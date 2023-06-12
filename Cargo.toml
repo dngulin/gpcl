@@ -1,0 +1,25 @@
+[package]
+name = "gpcl"
+description = "Gamepad controlled application launcher written in Rust & QML"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+readme = "README.md"
+
+[dependencies]
+qmetaobject = {git = "https://github.com/woboq/qmetaobject-rs", rev = "29bddb7"} # Fix for compilation with Qt6
+qttypes = {git = "https://github.com/woboq/qmetaobject-rs", rev = "29bddb7"}
+cstr = "0.2.11"
+nameof = "1.2.2"
+log = "0.4.17"
+env_logger = "0.10.0"
+toml = "0.7.3"
+serde = "1.0.163"
+serde_derive = "1.0.163"
+xdg = "2.5.0"
+gilrs = "0.10.2"
+cpp = "0.5.8"
+
+[build-dependencies]
+cpp_build = "0.5.8"
+semver = "1.0.17"
