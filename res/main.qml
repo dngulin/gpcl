@@ -2,34 +2,13 @@ import QtQml
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
-import GpcLauncherTypes
+import gpcl
 
 Window {
     id: window
     visible: true
     visibility: Window.FullScreen
     title: "Gamepad Controlled Launcher"
-
-    LauncherApp {
-        id: app
-    }
-
-    Component.onCompleted: {
-        if (!app.load_config()) {
-            return;
-        }
-
-        for (var i = 0; i < app.get_item_count(); i++) {
-            iconsModel.append({
-                "icon": app.get_item_icon(i),
-                "name": app.get_item_name(i)
-            });
-        }
-
-        if (app.init_gamepad_polling()) {
-            gamepadPollTimer.start();
-        }
-    }
 
     Image {
         id: bg
@@ -60,7 +39,7 @@ Window {
             renderTypeQuality: Text.VeryHighRenderTypeQuality
 
             color: "#ffffff"
-            text: getTime()
+            text: "00:00"
 
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -69,13 +48,6 @@ Window {
                 shadowVerticalOffset: clock.font.pixelSize * 0.08
                 shadowHorizontalOffset: shadowVerticalOffset * 0.5
                 shadowBlur: 0.8
-            }
-
-            function getTime() {
-                var date = new Date;
-                var hours = String(date.getHours());
-                var minutes = String(date.getMinutes());
-                return hours.padStart(2, "0") + ":" + minutes.padStart(2, "0");
             }
         }
 
@@ -104,10 +76,7 @@ Window {
             clip: true
             spacing: itemSize * 0.1
 
-            model: ListModel {
-                id: iconsModel
-            }
-
+            model: app
             delegate: itemDelegate
 
             highlight: Rectangle {
@@ -178,13 +147,39 @@ Window {
         }
     }
 
+    Launcher {
+        id: app
+
+        Component.onCompleted: {
+            app.init();
+            app.updateTime();
+        }
+
+        function updateTime() {
+            var date = new Date;
+            var hours = String(date.getHours());
+            var minutes = String(date.getMinutes());
+            clock.text = hours.padStart(2, "0") + ":" + minutes.padStart(2, "0");
+        }
+    }
+
     Timer {
         interval: 250
         running: true
         repeat: true
         onTriggered: {
-            clock.text = clock.getTime();
-            icons.interactive = !app.has_running_child();
+            app.updateTime();
+            icons.interactive = !app.has_running_item();
+        }
+    }
+
+    GamepadManager {
+        id: gamepadManager
+
+        Component.onCompleted: {
+            if (gamepadManager.init()) {
+                gamepadPollTimer.start();
+            }
         }
     }
 
@@ -194,7 +189,7 @@ Window {
         running: false
         repeat: true
         onTriggered: {
-            app.poll_gamepad();
+            gamepadManager.poll();
         }
     }
 }

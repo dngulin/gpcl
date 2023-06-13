@@ -1,12 +1,12 @@
 mod config;
 mod gamepad_manager;
 mod launcher;
-mod qml_types;
 
+use crate::gamepad_manager::QmlGamepadManager;
+use crate::launcher::QmlLauncher;
 pub use config::*;
 use cstr::cstr;
 use qmetaobject::{qml_register_type, qrc, QmlEngine};
-use qml_types::*;
 
 qrc!(load_resources, "res" as "" {"main.qml", "bg.svg"});
 
@@ -18,8 +18,9 @@ fn main() {
         .filter_level(log::LevelFilter::Debug)
         .init();
 
-    let import_uri = cstr!("GpcLauncherTypes");
-    qml_register_type::<LauncherApp>(import_uri, 1, 0, cstr!("LauncherApp"));
+    let import_uri = cstr!("gpcl");
+    qml_register_type::<QmlLauncher>(import_uri, 1, 0, cstr!("Launcher"));
+    qml_register_type::<QmlGamepadManager>(import_uri, 1, 0, cstr!("GamepadManager"));
 
     load_resources();
 
