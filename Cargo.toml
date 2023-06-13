@@ -19,6 +19,7 @@ serde_derive = "1.0.163"
 xdg = "2.5.0"
 gilrs = "0.10.2"
 cpp = "0.5.8"
+strum = { version = "0.24", features = ["derive"] }
 
 [build-dependencies]
 cpp_build = "0.5.8"

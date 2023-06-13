@@ -1,4 +1,6 @@
 mod config;
+mod gamepad_manager;
+mod launcher;
 mod qml_types;
 
 pub use config::*;
