@@ -1,9 +1,12 @@
+mod filter_axis_to_dpad_buttons;
+mod filter_dpad_button_events;
 mod gamepad_manager_impl;
 mod keymap;
 mod q_gui_app_event;
 
-use crate::gamepad_manager::keymap::KeyState;
 use gamepad_manager_impl::GamepadManager;
+use keymap::KeyState;
+
 use log::error;
 use qmetaobject::prelude::*;
 
