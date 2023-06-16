@@ -1,5 +1,6 @@
 mod filter_axis_to_dpad_buttons;
 mod filter_dpad_button_events;
+mod gamepad_list_model;
 mod gamepad_manager_impl;
 mod keymap;
 mod q_gui_app_event;
@@ -10,14 +11,17 @@ use keymap::KeyState;
 use log::error;
 use qmetaobject::prelude::*;
 
+pub use gamepad_list_model::QmlPowerStatus;
+
 #[derive(QObject, Default)]
 pub struct QmlGamepadManager {
-    base: qt_base_class!(trait QObject),
+    base: qt_base_class!(trait QAbstractListModel),
 
     init: qt_method!(fn(&self) -> bool),
     poll: qt_method!(fn(&mut self)),
 
     manager: Option<GamepadManager>,
+    gamepad_list: Vec<gamepad_list_model::Item>,
 }
 
 impl QmlGamepadManager {

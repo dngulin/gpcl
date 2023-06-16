@@ -1,12 +1,13 @@
 mod config;
 mod gamepad_manager;
 mod launcher;
+mod qml_bridge;
 
-use crate::gamepad_manager::QmlGamepadManager;
-use crate::launcher::QmlLauncher;
 pub use config::*;
 use cstr::cstr;
-use qmetaobject::{qml_register_type, qrc, QmlEngine};
+use gamepad_manager::{QmlGamepadManager, QmlPowerStatus};
+use launcher::QmlLauncher;
+use qmetaobject::{qml_register_enum, qml_register_type, qrc, QmlEngine};
 
 qrc!(load_resources, "res" as "" {"main.qml", "bg.svg"});
 
@@ -21,6 +22,7 @@ fn main() {
     let import_uri = cstr!("gpcl");
     qml_register_type::<QmlLauncher>(import_uri, 1, 0, cstr!("Launcher"));
     qml_register_type::<QmlGamepadManager>(import_uri, 1, 0, cstr!("GamepadManager"));
+    qml_register_enum::<QmlPowerStatus>(import_uri, 1, 0, cstr!("PowerStatus"));
 
     load_resources();
 
