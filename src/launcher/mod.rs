@@ -20,7 +20,7 @@ impl QmlLauncher {
     fn init(&mut self) -> bool {
         match Launcher::new() {
             Ok(launcher) => {
-                self.begin_insert_rows(0, (launcher.items.len() - 1) as i32);
+                self.begin_insert_rows(0, launcher.items.len().saturating_sub(1) as i32);
                 self.launcher = launcher;
                 self.end_insert_rows();
                 true
