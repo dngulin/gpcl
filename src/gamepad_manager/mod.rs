@@ -31,14 +31,18 @@ impl QmlGamepadManager {
         match GamepadManager::new() {
             Ok(manager) => {
                 let gamepads = manager.gamepads();
+                if !gamepads.is_empty() {
+                    let count = gamepads.len() as i32;
 
-                self.begin_insert_rows(0, gamepads.len().saturating_sub(1) as i32);
-                for gamepad in gamepads {
-                    if gamepad.is_connected() {
+                    let first = 0;
+                    let last = count - 1;
+
+                    self.begin_insert_rows(first, last);
+                    for gamepad in gamepads {
                         self.gamepads.push(gamepad.into());
                     }
+                    self.end_insert_rows();
                 }
-                self.end_insert_rows();
 
                 self.manager = Some(manager);
                 true

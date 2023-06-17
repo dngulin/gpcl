@@ -20,9 +20,15 @@ impl QmlLauncher {
     fn init(&mut self) -> bool {
         match Launcher::new() {
             Ok(launcher) => {
-                self.begin_insert_rows(0, launcher.items.len().saturating_sub(1) as i32);
+                let item_count = launcher.items.len() as i32;
+
                 self.launcher = launcher;
-                self.end_insert_rows();
+
+                if item_count > 0 {
+                    self.begin_insert_rows(0, item_count - 1);
+                    self.end_insert_rows();
+                }
+
                 true
             }
             Err(message) => {
