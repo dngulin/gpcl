@@ -3,7 +3,7 @@ use super::filter_dpad_button_events::filter_wrong_dpad_events;
 use super::keymap::{Key, KeyState};
 
 use gilrs::ev::filter::{axis_dpad_to_button, deadzone, Jitter, Repeat};
-use gilrs::{EventType, Filter, Gilrs, GilrsBuilder};
+use gilrs::{EventType, Filter, Gamepad, GamepadId, Gilrs, GilrsBuilder};
 use std::time::Duration;
 
 pub struct GamepadManager {
@@ -21,7 +21,19 @@ impl GamepadManager {
         Ok(Self { gilrs })
     }
 
-    pub fn next_event(&mut self) -> Option<(Key, KeyState)> {
+    pub fn gamepads(&self) -> Vec<Gamepad> {
+        self.gilrs.gamepads().map(|(_, g)| g).collect()
+    }
+}
+
+pub enum StateChange<'a> {
+    UpdateKey(Key, KeyState),
+    AddGamepad(Gamepad<'a>),
+    RemoveGamepad(GamepadId),
+}
+
+impl GamepadManager {
+    pub fn poll(&mut self) -> Option<StateChange> {
         let gilrs = &mut self.gilrs;
 
         let jitter = Jitter::new();
@@ -44,20 +56,24 @@ impl GamepadManager {
             match event.event {
                 EventType::ButtonPressed(btn, _) => {
                     if let Ok(key) = Key::try_from(btn) {
-                        return Some((key, KeyState::Pressed(false)));
+                        return Some(StateChange::UpdateKey(key, KeyState::Pressed(false)));
                     }
                 }
                 EventType::ButtonRepeated(btn, _) => {
                     if let Ok(key) = Key::try_from(btn) {
                         log::info!("repeat: {:?}", key);
-                        return Some((key, KeyState::Pressed(true)));
+                        return Some(StateChange::UpdateKey(key, KeyState::Pressed(true)));
                     }
                 }
                 EventType::ButtonReleased(btn, _) => {
                     if let Ok(key) = Key::try_from(btn) {
-                        return Some((key, KeyState::Released));
+                        return Some(StateChange::UpdateKey(key, KeyState::Released));
                     }
                 }
+                EventType::Connected => {
+                    return Some(StateChange::AddGamepad(gilrs.gamepad(event.id)))
+                }
+                EventType::Disconnected => return Some(StateChange::RemoveGamepad(event.id)),
                 _ => continue,
             }
         }

@@ -1,7 +1,7 @@
 use super::QmlGamepadManager;
 use crate::qml_bridge;
 
-use gilrs::GamepadId;
+use gilrs::{Gamepad, GamepadId, PowerInfo};
 use qmetaobject::prelude::*;
 use std::collections::HashMap;
 use strum::{EnumIter, FromRepr, IntoStaticStr};
@@ -40,7 +40,7 @@ impl From<FieldId> for i32 {
 
 impl QAbstractListModel for QmlGamepadManager {
     fn row_count(&self) -> i32 {
-        self.gamepad_list.len() as i32
+        self.gamepads.len() as i32
     }
 
     fn data(&self, index: QModelIndex, role: i32) -> QVariant {
@@ -55,7 +55,7 @@ impl QAbstractListModel for QmlGamepadManager {
 
 impl QmlGamepadManager {
     fn get_item_field(&self, index: usize, role: i32) -> Option<QVariant> {
-        let item = self.gamepad_list.get(index)?;
+        let item = self.gamepads.get(index)?;
         let field_id = FieldId::from_repr(role)?;
 
         let value = match field_id {
@@ -65,5 +65,26 @@ impl QmlGamepadManager {
         };
 
         Some(value)
+    }
+}
+
+impl<'a> From<Gamepad<'a>> for Item {
+    fn from(value: Gamepad) -> Self {
+        let (status, charge) = convert_power_info(value.power_info());
+        Self {
+            id: value.id(),
+            name: value.name().into(),
+            status,
+            charge,
+        }
+    }
+}
+
+pub fn convert_power_info(power_info: PowerInfo) -> (QmlPowerStatus, i32) {
+    match power_info {
+        PowerInfo::Unknown | PowerInfo::Wired => (QmlPowerStatus::Wired, 100),
+        PowerInfo::Discharging(charge) => (QmlPowerStatus::Discharging, charge as i32),
+        PowerInfo::Charging(charge) => (QmlPowerStatus::Charging, charge as i32),
+        PowerInfo::Charged => (QmlPowerStatus::Charging, 100),
     }
 }
