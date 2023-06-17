@@ -20,6 +20,31 @@ Window {
     ColumnLayout {
         anchors.fill: parent
 
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.fillHeight: false
+            Layout.preferredHeight: window.height * 0.05
+
+            color: "black"
+
+            Row {
+                Repeater {
+                    model: gamepadManager
+                    delegate: Text {
+                        required property string name;
+                        required property int status;
+                        required property int charge;
+
+                        text: name + " (" + status + ", " + charge + "%)"
+
+                        font.pixelSize: height
+                        font.family: "Ubuntu"
+                        color: "#ffffff"
+                    }
+                }
+            }
+        }
+
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
