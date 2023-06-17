@@ -4,9 +4,10 @@ use crate::qml_bridge;
 use gilrs::{Gamepad, GamepadId, PowerInfo};
 use qmetaobject::prelude::*;
 use std::collections::HashMap;
+use std::time::Instant;
 use strum::{EnumIter, FromRepr, IntoStaticStr};
 
-#[derive(Copy, Clone, Debug, QEnum)]
+#[derive(Copy, Clone, Debug, PartialEq, QEnum)]
 #[repr(i32)]
 pub enum QmlPowerStatus {
     Wired = 1,
@@ -17,10 +18,21 @@ pub enum QmlPowerStatus {
 
 pub struct Item {
     pub id: GamepadId,
+    update_time: Instant,
 
     pub name: QString,
     pub status: QmlPowerStatus,
     pub charge: i32,
+}
+
+impl Item {
+    pub fn get_seconds_since_last_update(&self) -> f32 {
+        self.update_time.elapsed().as_secs_f32()
+    }
+
+    pub fn reset_update_time(&mut self) {
+        self.update_time = Instant::now();
+    }
 }
 
 #[derive(Clone, Copy, FromRepr, IntoStaticStr, EnumIter)]
@@ -73,6 +85,8 @@ impl<'a> From<Gamepad<'a>> for Item {
         let (status, charge) = convert_power_info(value.power_info());
         Self {
             id: value.id(),
+            update_time: Instant::now(),
+
             name: value.name().into(),
             status,
             charge,

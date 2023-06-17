@@ -3,7 +3,7 @@ use super::filter_dpad_button_events::filter_wrong_dpad_events;
 use super::keymap::{Key, KeyState};
 
 use gilrs::ev::filter::{axis_dpad_to_button, deadzone, Jitter, Repeat};
-use gilrs::{EventType, Filter, Gamepad, GamepadId, Gilrs, GilrsBuilder};
+use gilrs::{EventType, Filter, Gamepad, GamepadId, Gilrs, GilrsBuilder, PowerInfo};
 use std::time::Duration;
 
 pub struct GamepadManager {
@@ -23,6 +23,10 @@ impl GamepadManager {
 
     pub fn gamepads(&self) -> Vec<Gamepad> {
         self.gilrs.gamepads().map(|(_, g)| g).collect()
+    }
+
+    pub fn get_power_info(&self, gamepad_id: GamepadId) -> PowerInfo {
+        self.gilrs.gamepad(gamepad_id).power_info()
     }
 }
 

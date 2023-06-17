@@ -5,6 +5,7 @@ mod gamepad_manager_impl;
 mod keymap;
 mod q_gui_app_event;
 
+use gamepad_list_model::convert_power_info;
 use gamepad_manager_impl::{GamepadManager, StateChange};
 use gilrs::GamepadId;
 use keymap::{Key, KeyState};
@@ -50,6 +51,10 @@ impl QmlGamepadManager {
     }
 
     fn poll(&mut self) {
+        if self.manager.is_none() {
+            return;
+        }
+
         while let Some(state_change) = self.poll_manager() {
             match state_change {
                 StateChange::UpdateKey(key, key_state) => {
@@ -72,6 +77,8 @@ impl QmlGamepadManager {
                 }
             }
         }
+
+        self.update_items();
     }
 
     fn poll_manager(&mut self) -> Option<StateChange> {
@@ -92,5 +99,31 @@ impl QmlGamepadManager {
 
     fn get_item_index(&self, id: GamepadId) -> Option<usize> {
         self.gamepads.iter().position(|item| item.id == id)
+    }
+
+    fn update_items(&mut self) {
+        for idx in 0..self.gamepads.len() {
+            let item = &mut self.gamepads[idx];
+            if item.get_seconds_since_last_update() < 0.5 {
+                continue;
+            }
+
+            if let Some(power_info) = self.manager.as_ref().map(|m| m.get_power_info(item.id)) {
+                let (status, charge) = convert_power_info(power_info);
+
+                item.reset_update_time();
+
+                if item.status != status || item.charge != charge {
+                    item.status = status;
+                    item.charge = charge;
+
+                    let model_idx_from = self.row_index(idx as i32);
+                    let model_idx_to = self.row_index(idx as i32);
+                    self.data_changed(model_idx_from, model_idx_to);
+                }
+            } else {
+                error!("Failed to get power info for `{}`", item.name)
+            }
+        }
     }
 }
