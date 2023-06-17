@@ -22,11 +22,17 @@ impl GamepadManager {
     }
 
     pub fn gamepads(&self) -> Vec<Gamepad> {
-        self.gilrs.gamepads().map(|(_, g)| g).collect()
+        self.gilrs
+            .gamepads()
+            .map(|(_, g)| g)
+            .filter(|g| g.is_connected())
+            .collect()
     }
 
-    pub fn get_power_info(&self, gamepad_id: GamepadId) -> PowerInfo {
-        self.gilrs.gamepad(gamepad_id).power_info()
+    pub fn get_power_info(&self, gamepad_id: GamepadId) -> Option<PowerInfo> {
+        self.gilrs
+            .connected_gamepad(gamepad_id)
+            .map(|g| g.power_info())
     }
 }
 

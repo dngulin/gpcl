@@ -112,7 +112,12 @@ impl QmlGamepadManager {
                 continue;
             }
 
-            if let Some(power_info) = self.manager.as_ref().map(|m| m.get_power_info(item.id)) {
+            if let Some(power_info) = self
+                .manager
+                .as_ref()
+                .map(|m| m.get_power_info(item.id))
+                .and_then(|opt_power_info| opt_power_info)
+            {
                 let (status, charge) = convert_power_info(power_info);
 
                 item.reset_update_time();
