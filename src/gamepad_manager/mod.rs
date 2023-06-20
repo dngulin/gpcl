@@ -3,7 +3,6 @@ mod filter_dpad_button_events;
 mod gamepad_list_model;
 mod gamepad_manager_impl;
 mod keymap;
-mod q_gui_app_event;
 
 use gamepad_list_model::convert_power_info;
 use gamepad_manager_impl::{GamepadManager, StateChange};
@@ -11,17 +10,10 @@ use gilrs::GamepadId;
 use keymap::{Key, KeyState};
 
 use log::error;
-use qmetaobject::prelude::*;
 
 pub use gamepad_list_model::QmlPowerStatus;
 
-#[derive(QObject, Default)]
 pub struct QmlGamepadManager {
-    base: qt_base_class!(trait QAbstractListModel),
-
-    init: qt_method!(fn(&self) -> bool),
-    poll: qt_method!(fn(&mut self)),
-
     manager: Option<GamepadManager>,
     gamepads: Vec<gamepad_list_model::Item>,
 }
@@ -37,11 +29,11 @@ impl QmlGamepadManager {
                     let first = 0;
                     let last = count - 1;
 
-                    self.begin_insert_rows(first, last);
+                    //self.begin_insert_rows(first, last);
                     for gamepad in gamepads {
                         self.gamepads.push(gamepad.into());
                     }
-                    self.end_insert_rows();
+                    //self.end_insert_rows();
                 }
 
                 self.manager = Some(manager);
@@ -68,15 +60,15 @@ impl QmlGamepadManager {
                     let item = gamepad.into();
                     let idx = self.gamepads.len() as i32;
 
-                    self.begin_insert_rows(idx, idx);
+                    //self.begin_insert_rows(idx, idx);
                     self.gamepads.push(item);
-                    self.end_insert_rows();
+                    //self.end_insert_rows();
                 }
                 StateChange::RemoveGamepad(gamepad_id) => {
                     if let Some(idx) = self.get_item_index(gamepad_id) {
-                        self.begin_remove_rows(idx as i32, idx as i32);
+                        //self.begin_remove_rows(idx as i32, idx as i32);
                         self.gamepads.remove(idx);
-                        self.end_remove_rows();
+                        //self.end_remove_rows();
                     }
                 }
             }
@@ -93,10 +85,10 @@ impl QmlGamepadManager {
         let key_code = key as i32;
         match key_state {
             KeyState::Pressed(is_auto_repeat) => {
-                q_gui_app_event::send_key_press(key_code, is_auto_repeat);
+                //q_gui_app_event::send_key_press(key_code, is_auto_repeat);
             }
             KeyState::Released => {
-                q_gui_app_event::send_key_release(key_code);
+                //q_gui_app_event::send_key_release(key_code);
             }
         }
     }
@@ -126,9 +118,9 @@ impl QmlGamepadManager {
                     item.status = status;
                     item.charge = charge;
 
-                    let model_idx_from = self.row_index(idx as i32);
+                    /*let model_idx_from = self.row_index(idx as i32);
                     let model_idx_to = self.row_index(idx as i32);
-                    self.data_changed(model_idx_from, model_idx_to);
+                    self.data_changed(model_idx_from, model_idx_to);*/
                 }
             } else {
                 error!("Failed to get power info for `{}`", item.name)

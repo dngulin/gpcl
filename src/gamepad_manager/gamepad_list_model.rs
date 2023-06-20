@@ -1,13 +1,10 @@
 use super::QmlGamepadManager;
-use crate::qml_bridge;
 
 use gilrs::{Gamepad, GamepadId, PowerInfo};
-use qmetaobject::prelude::*;
-use std::collections::HashMap;
 use std::time::Instant;
 use strum::{EnumIter, FromRepr, IntoStaticStr};
 
-#[derive(Copy, Clone, Debug, PartialEq, QEnum)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(i32)]
 pub enum QmlPowerStatus {
     Wired = 1,
@@ -20,7 +17,7 @@ pub struct Item {
     pub id: GamepadId,
     update_time: Instant,
 
-    pub name: QString,
+    pub name: String,
     pub status: QmlPowerStatus,
     pub charge: i32,
 }
@@ -39,7 +36,7 @@ impl Item {
 #[strum(serialize_all = "snake_case")]
 #[repr(i32)]
 enum FieldId {
-    Name = qmetaobject::USER_ROLE + 1,
+    Name = 1,
     Status,
     Charge,
 }
@@ -50,33 +47,18 @@ impl From<FieldId> for i32 {
     }
 }
 
-impl QAbstractListModel for QmlGamepadManager {
-    fn row_count(&self) -> i32 {
-        self.gamepads.len() as i32
-    }
-
-    fn data(&self, index: QModelIndex, role: i32) -> QVariant {
-        let item_idx = index.row() as usize;
-        self.get_item_field(item_idx, role).unwrap_or_default()
-    }
-
-    fn role_names(&self) -> HashMap<i32, QByteArray> {
-        qml_bridge::role_names::<FieldId>()
-    }
-}
-
 impl QmlGamepadManager {
-    fn get_item_field(&self, index: usize, role: i32) -> Option<QVariant> {
+    fn get_item_field(&self, index: usize, role: i32) -> Option<()> {
         let item = self.gamepads.get(index)?;
         let field_id = FieldId::from_repr(role)?;
 
-        let value = match field_id {
-            FieldId::Name => QVariant::from(&item.name),
-            FieldId::Status => QVariant::from(item.status as i32),
-            FieldId::Charge => QVariant::from(item.charge),
-        };
-
-        Some(value)
+        /*        let value = match field_id {
+                    FieldId::Name => QVariant::from(&item.name),
+                    FieldId::Status => QVariant::from(item.status as i32),
+                    FieldId::Charge => QVariant::from(item.charge),
+                };
+        */
+        Some(())
     }
 }
 

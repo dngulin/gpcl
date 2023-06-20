@@ -1,0 +1,9 @@
+import { GamepadModel, GamepadListView } from "gamepad-list.slint";
+
+export component MainWindow inherits Window {
+    in property <[GamepadModel]> model <=> gamepad-list.model;
+
+    gamepad-list := GamepadListView {
+        spacing: 2px;
+    }
+}

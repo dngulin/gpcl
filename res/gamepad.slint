@@ -1,0 +1,74 @@
+// Constants
+global GamepadStatusIcon {
+    out property <image> charging: @image-url("status/charging.svg");
+    out property <image> discharging: @image-url("status/discharging.svg");
+    out property <image> unknown: @image-url("status/unknown.svg");
+    out property <image> wired: @image-url("status/wired.svg");
+}
+
+// View Components
+component Label inherits Text {
+    color: white;
+    font-size: 24px * 0.6;
+    font-family: "Ubuntu";
+    font-weight: 700;
+    vertical-alignment: center;
+    horizontal-alignment: right;
+}
+
+component Icon inherits Image {
+    width: 24px;
+    height: 24px;
+}
+
+// View
+export component GamepadView inherits Rectangle {
+    in property <string> name;
+    in property <string> status;
+    in property <int> charge;
+
+    background: black;
+    border-radius: 5px;
+
+    HorizontalLayout {
+        spacing: 4px;
+        padding-left: 4px;
+        padding-right: 4px;
+        Icon {
+            source: @image-url("gamepad.svg");
+        }
+        Label {
+            text: name;
+        }
+        if isChargeVisible(status): Label {
+            text: "| " + charge + "%";
+        }
+        if status != "Wired": Icon {
+            source: getStatusIcon(status);
+        }
+    }
+
+    function isChargeVisible(status: string) -> bool {
+        if (status == "Charging" || status == "Discharging") {
+            return true;
+        }
+
+        return false;
+    }
+
+    function getStatusIcon(status: string) -> image {
+        if (status == "Wired") {
+            return GamepadStatusIcon.wired;
+        }
+
+        if (status == "Discharging") {
+            return GamepadStatusIcon.discharging;
+        }
+
+        if (status == "Charging") {
+            return GamepadStatusIcon.charging;
+        }
+        
+        return GamepadStatusIcon.unknown;
+    }
+}

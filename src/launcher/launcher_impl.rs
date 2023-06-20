@@ -1,4 +1,4 @@
-use crate::{AppItem, Config, CONFIG_FILE_NAME};
+use crate::{config::AppItem, config::Config, CONFIG_FILE_NAME};
 use std::fs;
 use std::process::{Child, Command};
 

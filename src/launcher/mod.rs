@@ -3,16 +3,8 @@ mod launcher_impl;
 
 use launcher_impl::Launcher;
 use log::error;
-use qmetaobject::prelude::*;
 
-#[derive(QObject, Default)]
 pub struct QmlLauncher {
-    base: qt_base_class!(trait QAbstractListModel),
-
-    init: qt_method!(fn(&mut self) -> bool),
-    exec_item: qt_method!(fn(&self, idx: usize) -> bool),
-    has_running_item: qt_method!(fn(&mut self) -> bool),
-
     launcher: Launcher,
 }
 
@@ -24,10 +16,10 @@ impl QmlLauncher {
 
                 self.launcher = launcher;
 
-                if item_count > 0 {
+                /*                if item_count > 0 {
                     self.begin_insert_rows(0, item_count - 1);
                     self.end_insert_rows();
-                }
+                }*/
 
                 true
             }
