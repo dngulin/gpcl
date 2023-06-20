@@ -9,7 +9,7 @@ global GamepadStatusIcon {
 // View Components
 component Label inherits Text {
     color: white;
-    font-size: 24px * 0.6;
+    font-size: self.height * 0.6;
     font-family: "Ubuntu";
     font-weight: 700;
     vertical-alignment: center;
@@ -17,8 +17,9 @@ component Label inherits Text {
 }
 
 component Icon inherits Image {
-    width: 24px;
-    height: 24px;
+    in property <length> size;
+    width: size;
+    height: size;
 }
 
 // View
@@ -27,14 +28,18 @@ export component GamepadView inherits Rectangle {
     in property <string> status;
     in property <int> charge;
 
+    property <length> spacing: self.height / 4;
+
     background: black;
-    border-radius: 5px;
+    border-radius: root.spacing;
 
     HorizontalLayout {
-        spacing: 4px;
-        padding-left: 4px;
-        padding-right: 4px;
+        spacing: root.spacing;
+        padding-left: root.spacing;
+        padding-right: root.spacing;
+
         Icon {
+            size: root.height;
             source: @image-url("gamepad.svg");
         }
         Label {
@@ -44,6 +49,7 @@ export component GamepadView inherits Rectangle {
             text: "| " + charge + "%";
         }
         if status != "Wired": Icon {
+            size: root.height;
             source: getStatusIcon(status);
         }
     }

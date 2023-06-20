@@ -2,8 +2,40 @@ import { GamepadModel, GamepadListView } from "gamepad-list.slint";
 
 export component MainWindow inherits Window {
     in property <[GamepadModel]> model <=> gamepad-list.model;
+    in property <string> clock_text <=> clock.text;
 
-    gamepad-list := GamepadListView {
-        spacing: 2px;
+    preferred-width: 800px;
+    preferred-height: 600px;
+
+    VerticalLayout {
+        alignment: stretch;
+
+        gamepad-list := GamepadListView {
+            height: 32px;
+            spacing: self.height / 16;
+
+            alignment: end;
+            padding-right: self.spacing;
+        }
+
+        clock := Text {
+            text: "00:00";
+            //color: white;
+            font-family: "Ubuntu";
+            font-size: root.height / 4;
+            font-weight: 800;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+
+        app-list := Rectangle {
+            height: 64px;
+        }
+
+        status-bar := Rectangle {
+            height: gamepad-list.height;
+            background: black;
+        }
     }
+    
 }

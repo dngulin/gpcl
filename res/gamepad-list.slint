@@ -10,7 +10,6 @@ export struct GamepadModel {
 export component GamepadListView inherits HorizontalLayout { 
     in property <[GamepadModel]> model;
 
-    alignment: end;
     for item[index] in model: GamepadView {
         name: item.name;
         status: item.status;
