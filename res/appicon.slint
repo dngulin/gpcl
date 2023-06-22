@@ -1,0 +1,33 @@
+export component AppIcon {
+    in property <length> size;
+    in property <length> icon-size;
+
+    in property <string> icon-name;
+    in property <image> icon-image;
+
+    width: size;
+    height: size;
+
+    VerticalLayout {
+        alignment: center;
+        HorizontalLayout {
+            alignment: center;
+            Image {
+                source: icon-image;
+                width: icon-size;
+                height: icon-size;
+            }
+        }
+        HorizontalLayout {
+            alignment: center;
+            Text {
+                width: size * 0.9;
+                font-size: (size - icon-size) / 2;
+                text: icon-name;
+                overflow: elide;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+        }
+    }
+}
