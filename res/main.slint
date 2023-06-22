@@ -1,4 +1,4 @@
-import { GamepadModel, GamepadListView } from "gamepad-list.slint";
+import { GamepadModel, GamepadList } from "gamepad-list.slint";
 
 export component MainWindow inherits Window {
     in property <[GamepadModel]> model <=> gamepad-list.model;
@@ -10,12 +10,9 @@ export component MainWindow inherits Window {
     VerticalLayout {
         alignment: stretch;
 
-        gamepad-list := GamepadListView {
+        gamepad-list := GamepadList {
             height: 32px;
-            spacing: self.height / 16;
-
-            alignment: end;
-            padding-right: self.spacing;
+            alignment: start;
         }
 
         clock := Text {

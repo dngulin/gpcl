@@ -1,4 +1,4 @@
-import { GamepadView } from "gamepad.slint";
+import { Gamepad } from "gamepad.slint";
 
 // Model Item
 export struct GamepadModel {
@@ -7,10 +7,14 @@ export struct GamepadModel {
     charge: int,
 }
 
-export component GamepadListView inherits HorizontalLayout { 
+export component GamepadList inherits HorizontalLayout { 
     in property <[GamepadModel]> model;
 
-    for item[index] in model: GamepadView {
+    spacing: self.height / 16;
+    padding-left: self.spacing;
+    padding-right: self.spacing;
+
+    for item[index] in model: Gamepad {
         name: item.name;
         status: item.status;
         charge: item.charge;
