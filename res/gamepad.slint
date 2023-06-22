@@ -1,9 +1,9 @@
 // Constants
 global GamepadStatusIcon {
-    out property <image> charging: @image-url("status/charging.svg");
-    out property <image> discharging: @image-url("status/discharging.svg");
-    out property <image> unknown: @image-url("status/unknown.svg");
-    out property <image> wired: @image-url("status/wired.svg");
+    out property <image> charging: @image-url("img/gamepad-status/charging.svg");
+    out property <image> discharging: @image-url("img/gamepad-status/discharging.svg");
+    out property <image> unknown: @image-url("img/gamepad-status/unknown.svg");
+    out property <image> wired: @image-url("img/gamepad-status/wired.svg");
 }
 
 // View Components
@@ -40,7 +40,7 @@ export component GamepadView inherits Rectangle {
 
         Icon {
             size: root.height;
-            source: @image-url("gamepad.svg");
+            source: @image-url("img/gamepad.svg");
         }
         Label {
             text: name;
