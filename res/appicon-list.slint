@@ -13,15 +13,21 @@ export component AppIconList inherits Flickable {
 
     height: item-size;
     viewport-height: item-size;
+    forward-focus: focus-scope;
+
+    animate viewport-x { duration: 200ms; }
+
+    property <int> selected-index: 0;
 
     selection := Rectangle {
-        x: 0px;
+        x: selected-index * item-size;
         y: 0px;
         width: item-size;
         height: item-size;
         background: gray;
         border-radius: item-size / 20;
-        visible: model.length > 0;
+
+        animate x { duration: 200ms; easing: ease-in-out; }
     }
     HorizontalLayout {
         for item in model: AppIcon {
@@ -30,5 +36,58 @@ export component AppIconList inherits Flickable {
             icon-name: item.name;
             icon-image: item.image;
         }
+    }
+
+    focus-scope := FocusScope {
+        key-pressed(event) => {
+            if (event.text == Key.RightArrow) {
+                move_selection_right();
+            } else
+            if (event.text == Key.LeftArrow) {
+                move_selection_left();
+            } else
+            if (event.text == Key.Return) {
+                debug("Process element with index: " + selected-index);
+            }
+            accept
+        }
+    }
+
+
+    function move_selection_right() {
+        selected-index = Math.min(selected-index + 1, model.length - 1);
+
+        if (selection_r() > port_r()) {
+            move_port(selection_r() - port_r());
+        }
+    }
+
+    function move_selection_left() {
+        selected-index = Math.max(selected-index - 1, 0);
+
+        if (selection_l() < port_l()) {
+            move_port(selection_l() - port_l());
+        }
+    }
+
+    function selection_l() -> length {
+        item-size * selected-index
+    }
+
+    function selection_r() -> length {
+        item-size * (selected-index + 1)
+    }
+
+    function port_l() -> length {
+        -self.viewport-x
+    }
+
+    function port_r() -> length
+    {
+        -self.viewport-x + self.width
+    }
+
+    function move_port(value: length) {
+        self.viewport-x -= value;
     }
 }

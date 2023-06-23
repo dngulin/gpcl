@@ -39,5 +39,14 @@ fn main() {
         charge: 33,
     });
 
+    let window_weak = window.as_weak();
+
+    // Workaround for https://github.com/slint-ui/slint/issues/2201
+    window_weak
+        .upgrade_in_event_loop(move |window| {
+            window.invoke_take_focus_workaround();
+        })
+        .unwrap();
+
     window.run().unwrap();
 }
