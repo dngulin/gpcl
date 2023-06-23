@@ -15,7 +15,7 @@ export component AppIconList inherits Flickable {
     viewport-height: item-size;
     forward-focus: focus-scope;
 
-    animate viewport-x { duration: 200ms; }
+    animate viewport-x { duration: 150ms; }
 
     property <int> selected-index: 0;
 
@@ -27,7 +27,7 @@ export component AppIconList inherits Flickable {
         background: gray;
         border-radius: item-size / 20;
 
-        animate x { duration: 200ms; easing: ease-in-out; }
+        animate x { duration: 150ms; }
     }
     HorizontalLayout {
         for item in model: AppIcon {
