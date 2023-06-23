@@ -1,130 +1,105 @@
 mod filter_axis_to_dpad_buttons;
 mod filter_dpad_button_events;
-mod gamepad_list_model;
-mod gamepad_manager_impl;
+mod gamepad_item;
 mod keymap;
 
-use gamepad_list_model::convert_power_info;
-use gamepad_manager_impl::{GamepadManager, StateChange};
-use gilrs::GamepadId;
+use filter_axis_to_dpad_buttons::left_axis_to_dpad_btn;
+use filter_dpad_button_events::filter_wrong_dpad_events;
 use keymap::{Key, KeyState};
+use std::rc::Rc;
 
-use log::error;
+use gilrs::ev::filter::{axis_dpad_to_button, deadzone, Jitter, Repeat};
+use gilrs::{EventType, Filter, Gamepad, GamepadId, Gilrs, GilrsBuilder, PowerInfo};
+use slint::platform::WindowEvent;
+use slint::{MapModel, Model, VecModel, Window};
+use std::time::Duration;
 
-pub use gamepad_list_model::QmlPowerStatus;
+use crate::GamepadModel;
+use gamepad_item::GamepadItem;
 
-pub struct QmlGamepadManager {
-    manager: Option<GamepadManager>,
-    gamepads: Vec<gamepad_list_model::Item>,
+type RcVec<T> = Rc<VecModel<T>>;
+type RcMap<T, F> = Rc<MapModel<T, F>>;
+
+pub struct GamepadManager {
+    gilrs: Gilrs,
+    gamepads: RcVec<GamepadItem>,
 }
 
-impl QmlGamepadManager {
-    fn init(&mut self) -> bool {
-        match GamepadManager::new() {
-            Ok(manager) => {
-                let gamepads = manager.gamepads();
-                if !gamepads.is_empty() {
-                    let count = gamepads.len() as i32;
+impl GamepadManager {
+    pub fn new() -> Result<Self, String> {
+        let gilrs = GilrsBuilder::new()
+            .with_default_filters(false)
+            .set_update_state(false)
+            .build()
+            .map_err(|error| format!("Failed to init gamepad input backend: {}", error))?;
 
-                    let first = 0;
-                    let last = count - 1;
+        let gamepads: VecModel<GamepadItem> = gilrs
+            .gamepads()
+            .map(|(_, g)| g)
+            .filter(|g| g.is_connected())
+            .map(|g| g.into())
+            .collect::<Vec<GamepadItem>>()
+            .into();
+        let gamepads = Rc::new(gamepads);
 
-                    //self.begin_insert_rows(first, last);
-                    for gamepad in gamepads {
-                        self.gamepads.push(gamepad.into());
-                    }
-                    //self.end_insert_rows();
-                }
-
-                self.manager = Some(manager);
-                true
-            }
-            Err(message) => {
-                error!("{}", message);
-                false
-            }
-        }
+        Ok(Self { gilrs, gamepads })
     }
 
-    fn poll(&mut self) {
-        if self.manager.is_none() {
-            return;
-        }
+    pub fn model(&self) -> RcMap<RcVec<GamepadItem>, impl Fn(GamepadItem) -> GamepadModel> {
+        let model = MapModel::new(self.gamepads.clone(), |i| i.into());
+        Rc::new(model)
+    }
 
-        while let Some(state_change) = self.poll_manager() {
-            match state_change {
-                StateChange::UpdateKey(key, key_state) => {
-                    Self::send_key_event(key, key_state);
-                }
-                StateChange::AddGamepad(gamepad) => {
-                    let item = gamepad.into();
-                    let idx = self.gamepads.len() as i32;
+    pub fn poll(&mut self, window: &Window) {
+        let gilrs = &mut self.gilrs;
 
-                    //self.begin_insert_rows(idx, idx);
-                    self.gamepads.push(item);
-                    //self.end_insert_rows();
+        let jitter = Jitter::new();
+        let repeat_filter = Repeat {
+            after: Duration::from_millis(600),
+            every: Duration::from_millis(50),
+        };
+
+        while let Some(event) = gilrs
+            .next_event()
+            .filter_ev(&axis_dpad_to_button, gilrs)
+            .filter_ev(&deadzone, gilrs)
+            .filter_ev(&jitter, gilrs)
+            .filter_ev(&left_axis_to_dpad_btn, gilrs)
+            .filter_ev(&filter_wrong_dpad_events, gilrs)
+            .filter_ev(&repeat_filter, gilrs)
+        {
+            gilrs.update(&event);
+
+            match event.event {
+                EventType::ButtonPressed(btn, _) | EventType::ButtonRepeated(btn, _) => {
+                    if let Ok(key) = Key::try_from(btn) {
+                        //window.dispatch_event(WindowEvent::KeyPressed { text: key.into() });
+                    }
                 }
-                StateChange::RemoveGamepad(gamepad_id) => {
-                    if let Some(idx) = self.get_item_index(gamepad_id) {
-                        //self.begin_remove_rows(idx as i32, idx as i32);
+                EventType::ButtonReleased(btn, _) => {
+                    if let Ok(key) = Key::try_from(btn) {
+                        //window.dispatch_event(WindowEvent::KeyReleased { text: key.into() });
+                    }
+                }
+                EventType::Connected => {
+                    self.gamepads.push(gilrs.gamepad(event.id).into());
+                }
+                EventType::Disconnected => {
+                    if let Some(idx) = find_index(&self.gamepads, event.id) {
                         self.gamepads.remove(idx);
-                        //self.end_remove_rows();
                     }
                 }
-            }
-        }
-
-        self.update_items();
-    }
-
-    fn poll_manager(&mut self) -> Option<StateChange> {
-        self.manager.as_mut()?.poll()
-    }
-
-    fn send_key_event(key: Key, key_state: KeyState) {
-        let key_code = key as i32;
-        match key_state {
-            KeyState::Pressed(is_auto_repeat) => {
-                //q_gui_app_event::send_key_press(key_code, is_auto_repeat);
-            }
-            KeyState::Released => {
-                //q_gui_app_event::send_key_release(key_code);
+                _ => continue,
             }
         }
     }
+}
 
-    fn get_item_index(&self, id: GamepadId) -> Option<usize> {
-        self.gamepads.iter().position(|item| item.id == id)
-    }
-
-    fn update_items(&mut self) {
-        for idx in 0..self.gamepads.len() {
-            let item = &mut self.gamepads[idx];
-            if item.get_seconds_since_last_update() < 0.5 {
-                continue;
-            }
-
-            if let Some(power_info) = self
-                .manager
-                .as_ref()
-                .map(|m| m.get_power_info(item.id))
-                .and_then(|opt_power_info| opt_power_info)
-            {
-                let (status, charge) = convert_power_info(power_info);
-
-                item.reset_update_time();
-
-                if item.status != status || item.charge != charge {
-                    item.status = status;
-                    item.charge = charge;
-
-                    /*let model_idx_from = self.row_index(idx as i32);
-                    let model_idx_to = self.row_index(idx as i32);
-                    self.data_changed(model_idx_from, model_idx_to);*/
-                }
-            } else {
-                error!("Failed to get power info for `{}`", item.name)
-            }
+fn find_index(gamepads: &RcVec<GamepadItem>, id: GamepadId) -> Option<usize> {
+    for (idx, item) in gamepads.iter().enumerate() {
+        if item.id == id {
+            return Some(idx);
         }
     }
+    None
 }

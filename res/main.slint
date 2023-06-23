@@ -2,7 +2,9 @@ import { GamepadModel, GamepadList } from "gamepad-list.slint";
 import { AppIconModel, AppIconList } from "appicon-list.slint";
 
 export component MainWindow inherits Window {
-    in property <[GamepadModel]> model <=> gamepad-list.model;
+    in property <[GamepadModel]> gamepad_list <=> gamepad-list.model;
+    in property <[AppIconModel]> app_list <=> app-list.model;
+
     in property <string> clock_text <=> clock.text;
 
     preferred-width: 800px;
@@ -32,25 +34,6 @@ export component MainWindow inherits Window {
             alignment: center;
             app-list := AppIconList {
                 icon-size: 128px;
-                model: [
-                    {name: "Foo 1", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 2", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 3", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                    {name: "Foo 4", image: @image-url("/usr/share/icons/hicolor/256x256/apps/kodi.png")},
-                ];
             }
         }
 
