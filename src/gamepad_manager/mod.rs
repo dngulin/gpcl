@@ -5,11 +5,10 @@ mod keymap;
 
 use filter_axis_to_dpad_buttons::left_axis_to_dpad_btn;
 use filter_dpad_button_events::filter_wrong_dpad_events;
-use keymap::{Key, KeyState};
 use std::rc::Rc;
 
 use gilrs::ev::filter::{axis_dpad_to_button, deadzone, Jitter, Repeat};
-use gilrs::{EventType, Filter, Gamepad, GamepadId, Gilrs, GilrsBuilder, PowerInfo};
+use gilrs::{EventType, Filter, GamepadId, Gilrs, GilrsBuilder};
 use slint::platform::WindowEvent;
 use slint::{MapModel, Model, VecModel, Window};
 use std::time::Duration;
@@ -72,13 +71,13 @@ impl GamepadManager {
 
             match event.event {
                 EventType::ButtonPressed(btn, _) | EventType::ButtonRepeated(btn, _) => {
-                    if let Ok(key) = Key::try_from(btn) {
-                        //window.dispatch_event(WindowEvent::KeyPressed { text: key.into() });
+                    if let Some(key) = keymap::btn_to_key(btn) {
+                        window.dispatch_event(WindowEvent::KeyPressed { text: key.into() });
                     }
                 }
                 EventType::ButtonReleased(btn, _) => {
-                    if let Ok(key) = Key::try_from(btn) {
-                        //window.dispatch_event(WindowEvent::KeyReleased { text: key.into() });
+                    if let Some(key) = keymap::btn_to_key(btn) {
+                        window.dispatch_event(WindowEvent::KeyReleased { text: key.into() });
                     }
                 }
                 EventType::Connected => {
