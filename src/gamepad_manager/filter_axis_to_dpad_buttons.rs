@@ -1,12 +1,12 @@
 use gilrs::ev::Code;
 use gilrs::{Axis, Button, Event, EventType, Gamepad, Gilrs};
 
-struct ButtonMap {
+struct AxisButtons {
     pub neg: Button,
     pub pos: Button,
 }
 
-impl ButtonMap {
+impl AxisButtons {
     fn neg_pos(neg: Button, pos: Button) -> Self {
         Self { neg, pos }
     }
@@ -31,14 +31,14 @@ pub fn left_axis_to_dpad_btn(ev: Option<Event>, gilrs: &mut Gilrs) -> Option<Eve
         match axis {
             Axis::LeftStickX => {
                 let delta = (gamepad.value(axis), new_value);
-                let buttons = ButtonMap::neg_pos(Button::DPadLeft, Button::DPadRight);
+                let buttons = AxisButtons::neg_pos(Button::DPadLeft, Button::DPadRight);
                 if let Some(btn_event) = get_mapped_event(&gamepad, &delta, &buttons) {
                     gilrs.insert_event(btn_event);
                 }
             }
             Axis::LeftStickY => {
                 let delta = (gamepad.value(axis), new_value);
-                let buttons = ButtonMap::neg_pos(Button::DPadDown, Button::DPadUp);
+                let buttons = AxisButtons::neg_pos(Button::DPadDown, Button::DPadUp);
                 if let Some(btn_event) = get_mapped_event(&gamepad, &delta, &buttons) {
                     gilrs.insert_event(btn_event);
                 }
@@ -50,7 +50,7 @@ pub fn left_axis_to_dpad_btn(ev: Option<Event>, gilrs: &mut Gilrs) -> Option<Eve
     ev
 }
 
-fn get_mapped_event(gp: &Gamepad, delta: &(f32, f32), buttons: &ButtonMap) -> Option<Event> {
+fn get_mapped_event(gp: &Gamepad, delta: &(f32, f32), buttons: &AxisButtons) -> Option<Event> {
     if let Some((neg, pos)) = append_btn_codes(gp, buttons) {
         if let Some(event_type) = axis_to_btn(delta, &neg, &pos) {
             return Some(Event::new(gp.id(), event_type));
@@ -60,7 +60,7 @@ fn get_mapped_event(gp: &Gamepad, delta: &(f32, f32), buttons: &ButtonMap) -> Op
     None
 }
 
-fn append_btn_codes(gamepad: &Gamepad, buttons: &ButtonMap) -> Option<(ButtonData, ButtonData)> {
+fn append_btn_codes(gamepad: &Gamepad, buttons: &AxisButtons) -> Option<(ButtonData, ButtonData)> {
     let code_neg = gamepad.button_code(buttons.neg)?;
     let code_pos = gamepad.button_code(buttons.pos)?;
     Some((
