@@ -5,10 +5,10 @@ use std::time::Instant;
 #[derive(Clone)]
 pub struct GamepadItem {
     pub id: GamepadId,
-    update_time: Instant,
-    name: String,
-    status: &'static str,
-    charge: i32,
+    pub update_time: Instant,
+    pub name: String,
+    pub status: &'static str,
+    pub charge: i32,
 }
 
 impl GamepadItem {

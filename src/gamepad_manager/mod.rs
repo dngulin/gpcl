@@ -14,7 +14,7 @@ use slint::{MapModel, Model, VecModel, Window};
 use std::time::Duration;
 
 use crate::GamepadModel;
-use gamepad_item::GamepadItem;
+use gamepad_item::{convert_power_info, GamepadItem};
 
 type RcVec<T> = Rc<VecModel<T>>;
 type RcMap<T, F> = Rc<MapModel<T, F>>;
@@ -90,6 +90,33 @@ impl GamepadManager {
                 }
                 _ => continue,
             }
+        }
+
+        self.update_power_info();
+    }
+
+    fn update_power_info(&mut self) {
+        for (idx, mut item) in self.gamepads.iter().enumerate() {
+            if item.get_seconds_since_last_update() < 0.5 {
+                continue;
+            }
+
+            if let Some(power_info) = self
+                .gilrs
+                .connected_gamepad(item.id)
+                .map(|g| g.power_info())
+            {
+                let (status, charge) = convert_power_info(power_info);
+                if item.status != status || item.charge != charge {
+                    item.status = status;
+                    item.charge = charge;
+                }
+            } else {
+                log::error!("Failed to get power info for `{}`", item.name)
+            }
+
+            item.reset_update_time();
+            self.gamepads.set_row_data(idx, item);
         }
     }
 }
