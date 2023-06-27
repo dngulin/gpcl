@@ -129,11 +129,13 @@ fn convert_power_info(power_info: PowerInfo) -> (GamepadStatus, i32) {
 
 impl<'a> From<Gamepad<'a>> for GamepadModel {
     fn from(gamepad: Gamepad<'a>) -> GamepadModel {
+        let name = gamepad.name().into();
         let (status, charge) = convert_power_info(gamepad.power_info());
+
         GamepadModel {
+            name,
+            status,
             charge,
-            name: gamepad.name().into(),
-            status: status,
         }
     }
 }

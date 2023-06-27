@@ -1,4 +1,3 @@
-mod app_list_model;
 mod launcher_impl;
 
 use launcher_impl::Launcher;
