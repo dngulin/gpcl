@@ -8,9 +8,9 @@ use filter_dpad_button_events::filter_wrong_dpad_events;
 use gamepad_item::GamepadItem;
 
 use gilrs::ev::filter::{axis_dpad_to_button, deadzone, Jitter, Repeat};
-use gilrs::{EventType, Filter, Gamepad, GamepadId, Gilrs, GilrsBuilder, PowerInfo};
+use gilrs::{EventType, Filter, Gamepad, Gilrs, GilrsBuilder, PowerInfo};
 use slint::platform::WindowEvent;
-use slint::{Model, Window};
+use slint::Window;
 use std::rc::Rc;
 use std::time::Duration;
 
