@@ -1,9 +1,9 @@
-import { Gamepad } from "gamepad.slint";
+import { Gamepad, GamepadStatus } from "gamepad.slint";
 
 // Model Item
 export struct GamepadModel {
     name: string,
-    status: string,
+    status: GamepadStatus,
     charge: int,
 }
 

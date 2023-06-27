@@ -15,7 +15,7 @@ use std::rc::Rc;
 use std::time::Duration;
 
 use crate::slint_bridge::Bridge;
-use crate::GamepadModel;
+use crate::{GamepadModel, GamepadStatus};
 
 pub struct GamepadManager {
     gilrs: Gilrs,
@@ -118,12 +118,12 @@ impl GamepadManager {
     }
 }
 
-fn convert_power_info(power_info: PowerInfo) -> (&'static str, i32) {
+fn convert_power_info(power_info: PowerInfo) -> (GamepadStatus, i32) {
     match power_info {
-        PowerInfo::Unknown | PowerInfo::Wired => ("Wired", 100),
-        PowerInfo::Discharging(charge) => ("Discharging", charge as i32),
-        PowerInfo::Charging(charge) => ("Charging", charge as i32),
-        PowerInfo::Charged => ("Charging", 100),
+        PowerInfo::Unknown | PowerInfo::Wired => (GamepadStatus::Wired, 100),
+        PowerInfo::Discharging(charge) => (GamepadStatus::Discharging, charge as i32),
+        PowerInfo::Charging(charge) => (GamepadStatus::Charging, charge as i32),
+        PowerInfo::Charged => (GamepadStatus::Charging, 100),
     }
 }
 
@@ -133,7 +133,7 @@ impl<'a> From<Gamepad<'a>> for GamepadModel {
         GamepadModel {
             charge,
             name: gamepad.name().into(),
-            status: status.into(),
+            status: status,
         }
     }
 }

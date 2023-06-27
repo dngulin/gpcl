@@ -1,9 +1,15 @@
-// Constants
 global GamepadStatusIcon {
     out property <image> charging: @image-url("img/gamepad-status/charging.svg");
     out property <image> discharging: @image-url("img/gamepad-status/discharging.svg");
     out property <image> unknown: @image-url("img/gamepad-status/unknown.svg");
     out property <image> wired: @image-url("img/gamepad-status/wired.svg");
+}
+
+export enum GamepadStatus {
+    Wired,
+    Discharging,
+    Charging,
+    Unknown
 }
 
 // View Components
@@ -25,7 +31,7 @@ component Icon inherits Image {
 // View
 export component Gamepad inherits Rectangle {
     in property <string> name;
-    in property <string> status;
+    in property <GamepadStatus> status;
     in property <int> charge;
 
     property <length> spacing: self.height / 4;
@@ -48,30 +54,30 @@ export component Gamepad inherits Rectangle {
         if isChargeVisible(status): Label {
             text: "| " + charge + "%";
         }
-        if status != "Wired": Icon {
+        if status != GamepadStatus.Wired: Icon {
             size: root.height;
             source: getStatusIcon(status);
         }
     }
 
-    function isChargeVisible(status: string) -> bool {
-        if (status == "Charging" || status == "Discharging") {
+    function isChargeVisible(status: GamepadStatus) -> bool {
+        if (status == GamepadStatus.Charging || status == GamepadStatus.Discharging) {
             return true;
         }
 
         return false;
     }
 
-    function getStatusIcon(status: string) -> image {
-        if (status == "Wired") {
+    function getStatusIcon(status: GamepadStatus) -> image {
+        if (status == GamepadStatus.Wired) {
             return GamepadStatusIcon.wired;
         }
 
-        if (status == "Discharging") {
+        if (status == GamepadStatus.Discharging) {
             return GamepadStatusIcon.discharging;
         }
 
-        if (status == "Charging") {
+        if (status == GamepadStatus.Charging) {
             return GamepadStatusIcon.charging;
         }
         
