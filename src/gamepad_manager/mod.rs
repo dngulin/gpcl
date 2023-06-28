@@ -105,7 +105,7 @@ impl GamepadManager {
             {
                 let (status, charge) = convert_power_info(power_info);
                 if model.status != status || model.charge != charge {
-                    model.status = status.into();
+                    model.status = status;
                     model.charge = charge;
                     return true;
                 }
