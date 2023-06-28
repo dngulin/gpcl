@@ -2,20 +2,20 @@ use slint::{Model, ModelNotify, ModelTracker};
 use std::any::Any;
 use std::cell::RefCell;
 
-pub struct Bridge<TSrc, TView> {
-    items: RefCell<Vec<(TSrc, TView)>>,
+pub struct ExtVecModel<TModel, TExt> {
+    items: RefCell<Vec<(TModel, TExt)>>,
     notify: ModelNotify,
 }
 
-impl<TSrc: 'static, TView: Clone + 'static> Model for Bridge<TSrc, TView> {
-    type Data = TView;
+impl<TModel: Clone + 'static, TExt: 'static> Model for ExtVecModel<TModel, TExt> {
+    type Data = TModel;
 
     fn row_count(&self) -> usize {
         self.items.borrow().len()
     }
 
     fn row_data(&self, row: usize) -> Option<Self::Data> {
-        self.items.borrow().get(row).map(|(_, x)| x).cloned()
+        self.items.borrow().get(row).map(|(m, _)| m).cloned()
     }
 
     fn model_tracker(&self) -> &dyn ModelTracker {
@@ -27,31 +27,31 @@ impl<TSrc: 'static, TView: Clone + 'static> Model for Bridge<TSrc, TView> {
     }
 }
 
-impl<TSrc, TView> Bridge<TSrc, TView> {
-    pub fn new(items: Vec<(TSrc, TView)>) -> Self {
+impl<TModel, TExt> ExtVecModel<TModel, TExt> {
+    pub fn new(items: Vec<(TModel, TExt)>) -> Self {
         Self {
             items: RefCell::new(items),
             notify: ModelNotify::default(),
         }
     }
 
-    pub fn add(&self, item: (TSrc, TView)) {
+    pub fn add(&self, item: (TModel, TExt)) {
         let idx = self.items.borrow().len();
 
         self.items.borrow_mut().push(item);
         self.notify.row_added(idx, 1);
     }
 
-    pub fn remove(&self, predicate: impl Fn(&TSrc) -> bool) {
+    pub fn remove(&self, predicate: impl Fn(&(TModel, TExt)) -> bool) {
         if let Some(idx) = self.find_index(predicate) {
             self.items.borrow_mut().remove(idx);
             self.notify.row_removed(idx, 1);
         }
     }
 
-    fn find_index(&self, predicate: impl Fn(&TSrc) -> bool) -> Option<usize> {
-        for (idx, (src, _)) in self.items.borrow().iter().enumerate() {
-            if predicate(src) {
+    fn find_index(&self, predicate: impl Fn(&(TModel, TExt)) -> bool) -> Option<usize> {
+        for (idx, pair) in self.items.borrow().iter().enumerate() {
+            if predicate(pair) {
                 return Some(idx);
             }
         }
@@ -59,17 +59,16 @@ impl<TSrc, TView> Bridge<TSrc, TView> {
         None
     }
 
-    pub fn update_items<F>(&self, mut f: F)
+    pub fn update_items<F>(&self, mut update_item: F)
     where
-        F: FnMut(&mut TSrc, &mut TView) -> bool,
+        F: FnMut(&mut TModel, &mut TExt) -> bool,
     {
         self.items
             .borrow_mut()
             .iter_mut()
             .enumerate()
-            .for_each(move |(idx, (src, view))| {
-                let view_updated = f(src, view);
-                if view_updated {
+            .for_each(move |(idx, (model, ext))| {
+                if update_item(model, ext) {
                     self.notify.row_changed(idx);
                 }
             });

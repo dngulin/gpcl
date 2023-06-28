@@ -14,12 +14,12 @@ use slint::Window;
 use std::rc::Rc;
 use std::time::Duration;
 
-use crate::slint_bridge::Bridge;
+use crate::slint_bridge::ExtVecModel;
 use crate::{GamepadModel, GamepadStatus};
 
 pub struct GamepadManager {
     gilrs: Gilrs,
-    gamepads: Rc<Bridge<GamepadItem, GamepadModel>>,
+    gamepads: Rc<ExtVecModel<GamepadModel, GamepadItem>>,
 }
 
 impl GamepadManager {
@@ -33,14 +33,14 @@ impl GamepadManager {
         let gamepads = gilrs
             .gamepads()
             .filter(|(_, g)| g.is_connected())
-            .map(|(id, g)| (GamepadItem::new(id), GamepadModel::from(g)))
-            .collect::<Vec<(GamepadItem, GamepadModel)>>();
-        let gamepads = Rc::new(Bridge::new(gamepads));
+            .map(|(id, g)| (GamepadModel::from(g), GamepadItem::new(id)))
+            .collect::<Vec<(GamepadModel, GamepadItem)>>();
+        let gamepads = Rc::new(ExtVecModel::new(gamepads));
 
         Ok(Self { gilrs, gamepads })
     }
 
-    pub fn model(&self) -> Rc<Bridge<GamepadItem, GamepadModel>> {
+    pub fn model(&self) -> Rc<ExtVecModel<GamepadModel, GamepadItem>> {
         self.gamepads.clone()
     }
 
@@ -77,11 +77,12 @@ impl GamepadManager {
                 }
                 EventType::Connected => {
                     let id = event.id;
-                    let pair = (GamepadItem::new(id), gilrs.gamepad(id).into());
+                    let pair = (gilrs.gamepad(id).into(), GamepadItem::new(id));
                     self.gamepads.add(pair);
                 }
                 EventType::Disconnected => {
-                    self.gamepads.remove(|item| item.id == event.id);
+                    self.gamepads
+                        .remove(|(_, tracking)| tracking.id == event.id);
                 }
                 _ => continue,
             }
@@ -91,16 +92,16 @@ impl GamepadManager {
     }
 
     fn update_power_info(&mut self) {
-        self.gamepads.update_items(|item, model| {
-            if item.get_seconds_since_last_update() < 0.5 {
+        self.gamepads.update_items(|model, tracking| {
+            if tracking.get_seconds_since_last_update() < 0.5 {
                 return false;
             }
 
-            item.reset_update_time();
+            tracking.reset_update_time();
 
             if let Some(power_info) = self
                 .gilrs
-                .connected_gamepad(item.id)
+                .connected_gamepad(tracking.id)
                 .map(|g| g.power_info())
             {
                 let (status, charge) = convert_power_info(power_info);
