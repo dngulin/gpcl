@@ -1,25 +1,25 @@
 mod filter_axis_to_dpad_buttons;
 mod filter_dpad_button_events;
-mod gamepad_item;
 mod keymap;
+mod model;
 
 use filter_axis_to_dpad_buttons::left_axis_to_dpad_btn;
 use filter_dpad_button_events::filter_wrong_dpad_events;
-use gamepad_item::GamepadItem;
+use model::{gamepad_to_model_item, TrackingState, UpdatePowerInfo};
 
 use gilrs::ev::filter::{axis_dpad_to_button, deadzone, Jitter, Repeat};
-use gilrs::{EventType, Filter, Gamepad, Gilrs, GilrsBuilder, PowerInfo};
+use gilrs::{EventType, Filter, GamepadId, Gilrs, GilrsBuilder, PowerInfo};
 use slint::platform::WindowEvent;
 use slint::Window;
 use std::rc::Rc;
 use std::time::Duration;
 
 use crate::slint_models::ExtVecModel;
-use crate::{GamepadModel, GamepadStatus};
+use crate::GamepadModel;
 
 pub struct GamepadManager {
     gilrs: Gilrs,
-    gamepads: Rc<ExtVecModel<GamepadModel, GamepadItem>>,
+    gamepads: Rc<ExtVecModel<GamepadModel, TrackingState>>,
 }
 
 impl GamepadManager {
@@ -33,14 +33,14 @@ impl GamepadManager {
         let gamepads = gilrs
             .gamepads()
             .filter(|(_, g)| g.is_connected())
-            .map(|(id, g)| (GamepadModel::from(g), GamepadItem::new(id)))
-            .collect::<Vec<(GamepadModel, GamepadItem)>>();
+            .map(|(_, g)| gamepad_to_model_item(g))
+            .collect();
         let gamepads = Rc::new(ExtVecModel::new(gamepads));
 
         Ok(Self { gilrs, gamepads })
     }
 
-    pub fn model(&self) -> Rc<ExtVecModel<GamepadModel, GamepadItem>> {
+    pub fn model(&self) -> Rc<ExtVecModel<GamepadModel, TrackingState>> {
         self.gamepads.clone()
     }
 
@@ -63,6 +63,7 @@ impl GamepadManager {
             .filter_ev(&repeat_filter, gilrs)
         {
             gilrs.update(&event);
+            let gamepad_id = event.id;
 
             match event.event {
                 EventType::ButtonPressed(btn, _) | EventType::ButtonRepeated(btn, _) => {
@@ -76,13 +77,12 @@ impl GamepadManager {
                     }
                 }
                 EventType::Connected => {
-                    let id = event.id;
-                    let pair = (gilrs.gamepad(id).into(), GamepadItem::new(id));
-                    self.gamepads.add(pair);
+                    let item = gamepad_to_model_item(gilrs.gamepad(gamepad_id));
+                    self.gamepads.add(item);
                 }
                 EventType::Disconnected => {
                     self.gamepads
-                        .remove(|(_, tracking)| tracking.id == event.id);
+                        .remove(|(_, tracking_state)| tracking_state.gamepad_id == gamepad_id);
                 }
                 _ => continue,
             }
@@ -92,51 +92,23 @@ impl GamepadManager {
     }
 
     fn update_power_info(&mut self) {
-        self.gamepads.update_items(|model, tracking| {
-            if tracking.get_seconds_since_last_update() < 0.5 {
+        self.gamepads.update_items(|model, tracking_state| {
+            if tracking_state.get_seconds_since_last_update() < 0.5 {
                 return false;
             }
 
-            tracking.reset_update_time();
+            tracking_state.reset_update_time();
 
-            if let Some(power_info) = self
-                .gilrs
-                .connected_gamepad(tracking.id)
-                .map(|g| g.power_info())
-            {
-                let (status, charge) = convert_power_info(power_info);
-                if model.status != status || model.charge != charge {
-                    model.status = status;
-                    model.charge = charge;
-                    return true;
-                }
-            } else {
-                log::error!("Failed to get power info for `{}`", model.name)
+            if let Some(info) = get_power_info(&self.gilrs, tracking_state.gamepad_id) {
+                return model.update_power_info(info);
             }
 
+            log::error!("Failed to get power info for `{}`", model.name);
             false
         });
     }
 }
 
-fn convert_power_info(power_info: PowerInfo) -> (GamepadStatus, i32) {
-    match power_info {
-        PowerInfo::Unknown | PowerInfo::Wired => (GamepadStatus::Wired, 100),
-        PowerInfo::Discharging(charge) => (GamepadStatus::Discharging, charge as i32),
-        PowerInfo::Charging(charge) => (GamepadStatus::Charging, charge as i32),
-        PowerInfo::Charged => (GamepadStatus::Charging, 100),
-    }
-}
-
-impl<'a> From<Gamepad<'a>> for GamepadModel {
-    fn from(gamepad: Gamepad<'a>) -> GamepadModel {
-        let name = gamepad.name().into();
-        let (status, charge) = convert_power_info(gamepad.power_info());
-
-        GamepadModel {
-            name,
-            status,
-            charge,
-        }
-    }
+fn get_power_info(gilrs: &Gilrs, gamepad_id: GamepadId) -> Option<PowerInfo> {
+    gilrs.connected_gamepad(gamepad_id).map(|g| g.power_info())
 }
