@@ -14,7 +14,7 @@ use slint::Window;
 use std::rc::Rc;
 use std::time::Duration;
 
-use crate::slint_bridge::ExtVecModel;
+use crate::slint_models::ExtVecModel;
 use crate::{GamepadModel, GamepadStatus};
 
 pub struct GamepadManager {

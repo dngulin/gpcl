@@ -1,7 +1,7 @@
 mod config;
 mod gamepad_manager;
 mod launcher;
-mod slint_bridge;
+mod slint_models;
 
 use gamepad_manager::GamepadManager;
 use std::mem;
