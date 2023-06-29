@@ -1,6 +1,6 @@
 use slint::{Model, ModelNotify, ModelTracker};
 use std::any::Any;
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell};
 
 pub struct ExtVecModel<TModel, TExt> {
     items: RefCell<Vec<(TModel, TExt)>>,
@@ -72,5 +72,9 @@ impl<TModel, TExt> ExtVecModel<TModel, TExt> {
                     self.notify.row_changed(idx);
                 }
             });
+    }
+
+    pub fn get_ref(&self, idx: usize) -> Option<Ref<(TModel, TExt)>> {
+        Ref::filter_map(self.items.borrow(), |items| items.get(idx)).ok()
     }
 }

@@ -1,48 +1,61 @@
-mod launcher_impl;
+mod model;
 
-use launcher_impl::Launcher;
-use log::error;
+use model::Executable;
+use std::ops::Deref;
 
-pub struct QmlLauncher {
-    launcher: Launcher,
+use crate::slint_models::ExtVecModel;
+use crate::{config::AppIconConfig, AppIconModel, CONFIG_FILE_NAME};
+
+use crate::launcher::model::config_entry_into_item;
+use std::process::{Child, Command};
+use std::rc::Rc;
+
+pub struct Launcher {
+    items: Rc<ExtVecModel<AppIconModel, Executable>>,
+    child_process: Option<Child>,
 }
 
-impl QmlLauncher {
-    fn init(&mut self) -> bool {
-        match Launcher::new() {
-            Ok(launcher) => {
-                let item_count = launcher.items.len() as i32;
+impl Launcher {
+    pub fn new(items: &[AppIconConfig]) -> Self {
+        let items = items.iter().map(config_entry_into_item).collect();
 
-                self.launcher = launcher;
-
-                /*                if item_count > 0 {
-                    self.begin_insert_rows(0, item_count - 1);
-                    self.end_insert_rows();
-                }*/
-
-                true
-            }
-            Err(message) => {
-                error!("{}", message);
-                false
-            }
+        Self {
+            items: Rc::new(ExtVecModel::new(items)),
+            child_process: None,
         }
     }
 
-    fn exec_item(&mut self, idx: usize) -> bool {
-        if self.launcher.has_running_item() {
-            return false;
-        }
-
-        if let Err(message) = self.launcher.exec_item(idx) {
-            error!("{}", message);
-            return false;
-        }
-
-        true
+    pub fn model(&self) -> Rc<ExtVecModel<AppIconModel, Executable>> {
+        self.items.clone()
     }
 
-    fn has_running_item(&mut self) -> bool {
-        self.launcher.has_running_item()
+    pub fn exec_item(&mut self, idx: usize) {
+        if let Some(item_ref) = self.items.get_ref(idx) {
+            let (model, exec) = item_ref.deref();
+
+            let child = match Command::new(&exec.program).args(&exec.args).spawn() {
+                Ok(child) => Some(child),
+                Err(error) => {
+                    log::error!("Failed to execute the command `{}`: {}", model.name, error);
+                    None
+                }
+            };
+
+            self.child_process = child;
+        } else {
+            log::error!("Bad model index to run: {}", idx);
+        }
+    }
+
+    pub fn check_if_child_is_running(&mut self) -> bool {
+        if let Some(child) = &mut self.child_process {
+            if let Ok(exit_status) = child.try_wait() {
+                if exit_status.is_none() {
+                    return true;
+                }
+            }
+        }
+
+        false
     }
 }
