@@ -16,6 +16,7 @@ xdg = "2.5.0"
 gilrs = "0.10.2"
 log = "0.4.17"
 env_logger = "0.10.0"
+chrono = "0.4.24"
 
 [build-dependencies]
 slint-build = "1.1.0"

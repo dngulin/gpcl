@@ -8,7 +8,7 @@ use gamepad_manager::GamepadManager;
 use launcher::Launcher;
 use std::cell::RefCell;
 
-use slint::{Timer, TimerMode};
+use slint::{SharedString, Timer, TimerMode};
 use std::fs;
 use std::rc::Rc;
 use std::time::Duration;
@@ -25,6 +25,7 @@ fn main() {
     let window = MainWindow::new().unwrap();
 
     let _gp_poll_timer = setup_gamepad_manager(&window);
+    let _clock_timer = setup_clock(&window);
     let _launcher_timer = setup_launcher(&window);
 
     take_focus_hack(&window);
@@ -45,6 +46,26 @@ fn setup_gamepad_manager(window: &MainWindow) -> Timer {
     });
 
     gamepad_poll_timer
+}
+
+fn setup_clock(window: &MainWindow) -> Timer {
+    window.set_clock_text(get_time_string());
+
+    let window_weak = window.as_weak();
+    let clock_timer = Timer::default();
+
+    clock_timer.start(TimerMode::Repeated, Duration::from_millis(400), move || {
+        if let Some(window) = window_weak.upgrade() {
+            window.set_clock_text(get_time_string());
+        }
+    });
+
+    clock_timer
+}
+
+fn get_time_string() -> SharedString {
+    let time = chrono::Local::now().time();
+    time.format("%H:%M").to_string().into()
 }
 
 fn setup_launcher(window: &MainWindow) -> Timer {
