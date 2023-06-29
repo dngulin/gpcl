@@ -4,7 +4,6 @@ mod launcher;
 mod slint_models;
 
 use gamepad_manager::GamepadManager;
-use std::mem;
 
 use slint::{Timer, TimerMode};
 use std::time::Duration;
@@ -20,7 +19,7 @@ fn main() {
 
     let window = MainWindow::new().unwrap();
 
-    setup_gamepad_manager(&window);
+    let _gp_timer = setup_gamepad_manager(&window);
 
     // Workaround for https://github.com/slint-ui/slint/issues/2201
     window
@@ -33,7 +32,7 @@ fn main() {
     window.run().unwrap();
 }
 
-fn setup_gamepad_manager(window: &MainWindow) {
+fn setup_gamepad_manager(window: &MainWindow) -> Timer {
     let mut gamepad_manager = GamepadManager::new().unwrap();
     window.set_gamepad_list(gamepad_manager.model().into());
 
@@ -45,5 +44,5 @@ fn setup_gamepad_manager(window: &MainWindow) {
         }
     });
 
-    mem::forget(gamepad_poll_timer);
+    gamepad_poll_timer
 }
