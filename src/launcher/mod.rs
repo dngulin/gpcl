@@ -30,6 +30,11 @@ impl Launcher {
     }
 
     pub fn exec_item(&mut self, idx: usize) {
+        if self.check_if_child_is_running() {
+            log::warn!("Try to run more than one application at once");
+            return;
+        }
+
         if let Some(item_ref) = self.items.get_ref(idx) {
             let (model, exec) = item_ref.deref();
 

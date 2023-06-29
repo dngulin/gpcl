@@ -8,7 +8,9 @@ export struct AppIconModel {
 export component AppIconList inherits Flickable {
     in property <length> icon-size;
     in property <[AppIconModel]> model;
+
     callback item_activated(int);
+    in-out property<bool> is-interactive: true;
 
     property <length> item-size: icon-size * 1.3;
 
@@ -41,14 +43,17 @@ export component AppIconList inherits Flickable {
 
     focus-scope := FocusScope {
         key-pressed(event) => {
-            if (event.text == Key.RightArrow) {
-                move_selection_right();
-            } else
-            if (event.text == Key.LeftArrow) {
-                move_selection_left();
-            } else
-            if (event.text == Key.Return) {
-                root.item_activated(selected-index);
+            if (is-interactive) {
+                if (event.text == Key.RightArrow) {
+                    move_selection_right();
+                } else
+                if (event.text == Key.LeftArrow) {
+                    move_selection_left();
+                } else
+                if (event.text == Key.Return) {
+                    root.item_activated(selected-index);
+                    is-interactive = false;
+                }
             }
             accept
         }

@@ -6,9 +6,11 @@ mod slint_models;
 use config::Config;
 use gamepad_manager::GamepadManager;
 use launcher::Launcher;
+use std::cell::RefCell;
 
 use slint::{Timer, TimerMode};
 use std::fs;
+use std::rc::Rc;
 use std::time::Duration;
 
 slint::include_modules!();
@@ -22,8 +24,8 @@ fn main() {
 
     let window = MainWindow::new().unwrap();
 
-    let _gp_timer = setup_gamepad_manager(&window);
-    setup_launcher(&window);
+    let _gp_poll_timer = setup_gamepad_manager(&window);
+    let _launcher_timer = setup_launcher(&window);
 
     take_focus_hack(&window);
     window.run().unwrap();
@@ -45,7 +47,7 @@ fn setup_gamepad_manager(window: &MainWindow) -> Timer {
     gamepad_poll_timer
 }
 
-fn setup_launcher(window: &MainWindow) {
+fn setup_launcher(window: &MainWindow) -> Timer {
     let xdg_dirs = xdg::BaseDirectories::new().unwrap();
 
     let config_path = xdg_dirs.get_config_file(CONFIG_FILE_NAME);
@@ -53,10 +55,27 @@ fn setup_launcher(window: &MainWindow) {
 
     let config = toml::from_str::<Config>(&contents).unwrap();
 
-    let mut launcher = Launcher::new(&config.items);
-
+    let launcher = Launcher::new(&config.items);
     window.set_app_list(launcher.model().into());
-    window.on_app_icon_activated(move |idx| launcher.exec_item(idx as usize));
+
+    let launcher = Rc::new(RefCell::new(launcher));
+
+    {
+        let launcher = launcher.clone();
+        window.on_app_icon_activated(move |idx| launcher.borrow_mut().exec_item(idx as usize));
+    }
+
+    let window_weak = window.as_weak();
+    let child_poll_timer = Timer::default();
+
+    child_poll_timer.start(TimerMode::Repeated, Duration::from_millis(250), move || {
+        if let Some(window) = window_weak.upgrade() {
+            let is_running = launcher.borrow_mut().check_if_child_is_running();
+            window.invoke_set_child_process_state(is_running);
+        }
+    });
+
+    child_poll_timer
 }
 
 // Workaround for https://github.com/slint-ui/slint/issues/2201
