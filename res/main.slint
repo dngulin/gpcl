@@ -7,6 +7,9 @@ export component MainWindow inherits Window {
 
     in property <string> clock_text <=> clock.text;
 
+    callback app_icon_activated <=> app-list.item_activated;
+
+
     preferred-width: 800px;
     preferred-height: 600px;
 

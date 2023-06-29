@@ -4,7 +4,7 @@ use model::Executable;
 use std::ops::Deref;
 
 use crate::slint_models::ExtVecModel;
-use crate::{config::AppIconConfig, AppIconModel, CONFIG_FILE_NAME};
+use crate::{config::AppIconConfig, AppIconModel};
 
 use crate::launcher::model::config_entry_into_item;
 use std::process::{Child, Command};
