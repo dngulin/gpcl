@@ -46,8 +46,9 @@ impl GamepadManager {
     }
 
     pub fn poll(&mut self, window: &Window) {
-        let gilrs = &mut self.gilrs;
+        let has_focus = window.with_winit_window(|ww| ww.has_focus()).unwrap();
 
+        let gilrs = &mut self.gilrs;
         let jitter = Jitter::new();
         let repeat_filter = Repeat {
             after: Duration::from_millis(600),
@@ -65,8 +66,6 @@ impl GamepadManager {
         {
             gilrs.update(&event);
             let gamepad_id = event.id;
-
-            let has_focus = window.with_winit_window(|ww| ww.has_focus()).unwrap();
 
             match event.event {
                 EventType::ButtonPressed(btn, _) | EventType::ButtonRepeated(btn, _)
