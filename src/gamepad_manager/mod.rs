@@ -9,6 +9,7 @@ use model::{gamepad_to_model_item, TrackingState, UpdatePowerInfo};
 
 use gilrs::ev::filter::{axis_dpad_to_button, deadzone, Jitter, Repeat};
 use gilrs::{EventType, Filter, GamepadId, Gilrs, GilrsBuilder, PowerInfo};
+use i_slint_backend_winit::WinitWindowAccessor;
 use slint::platform::WindowEvent;
 use slint::Window;
 use std::rc::Rc;
@@ -65,13 +66,17 @@ impl GamepadManager {
             gilrs.update(&event);
             let gamepad_id = event.id;
 
+            let has_focus = window.with_winit_window(|ww| ww.has_focus()).unwrap();
+
             match event.event {
-                EventType::ButtonPressed(btn, _) | EventType::ButtonRepeated(btn, _) => {
+                EventType::ButtonPressed(btn, _) | EventType::ButtonRepeated(btn, _)
+                    if has_focus =>
+                {
                     if let Some(key) = keymap::btn_to_key(btn) {
                         window.dispatch_event(WindowEvent::KeyPressed { text: key.into() });
                     }
                 }
-                EventType::ButtonReleased(btn, _) => {
+                EventType::ButtonReleased(btn, _) if has_focus => {
                     if let Some(key) = keymap::btn_to_key(btn) {
                         window.dispatch_event(WindowEvent::KeyReleased { text: key.into() });
                     }

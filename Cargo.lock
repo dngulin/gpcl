@@ -975,6 +975,7 @@ version = "0.2.0"
 dependencies = [
  "env_logger",
  "gilrs",
+ "i-slint-backend-winit",
  "log",
  "serde",
  "serde_derive",

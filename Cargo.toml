@@ -8,6 +8,7 @@ readme = "README.md"
 
 [dependencies]
 slint = { version = "1.1.0", default-features = false, features = ["std", "backend-winit-wayland", "renderer-winit-femtovg", "compat-1-0",] }
+i-slint-backend-winit = "1.1.0"
 toml = "0.7.3"
 serde = "1.0.163"
 serde_derive = "1.0.163"
