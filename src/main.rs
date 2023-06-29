@@ -21,14 +21,7 @@ fn main() {
 
     let _gp_timer = setup_gamepad_manager(&window);
 
-    // Workaround for https://github.com/slint-ui/slint/issues/2201
-    window
-        .as_weak()
-        .upgrade_in_event_loop(move |window| {
-            window.invoke_take_focus_workaround();
-        })
-        .unwrap();
-
+    take_focus_hack(&window);
     window.run().unwrap();
 }
 
@@ -38,6 +31,7 @@ fn setup_gamepad_manager(window: &MainWindow) -> Timer {
 
     let window_weak = window.as_weak();
     let gamepad_poll_timer = Timer::default();
+
     gamepad_poll_timer.start(TimerMode::Repeated, Duration::from_millis(16), move || {
         if let Some(window) = window_weak.upgrade() {
             gamepad_manager.poll(window.window());
@@ -45,4 +39,14 @@ fn setup_gamepad_manager(window: &MainWindow) -> Timer {
     });
 
     gamepad_poll_timer
+}
+
+// Workaround for https://github.com/slint-ui/slint/issues/2201
+fn take_focus_hack(window: &MainWindow) {
+    window
+        .as_weak()
+        .upgrade_in_event_loop(move |window| {
+            window.invoke_take_focus_workaround();
+        })
+        .unwrap();
 }
