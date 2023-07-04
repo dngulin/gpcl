@@ -11,6 +11,13 @@ export component MainWindow inherits Window {
 
     forward-focus: app-list;
 
+    bg := Image {
+        width: 100%;
+        height: 100%;
+        image-fit: fill;
+        source: @image-url("img/bg.svg");
+    }
+
     VerticalLayout {
         alignment: stretch;
 
