@@ -10,6 +10,7 @@ export component MainWindow inherits Window {
 
     callback app_icon_activated <=> app-list.item_activated;
 
+    default-font-family: "Ubuntu";
     forward-focus: app-list;
 
     bg := Background {
@@ -26,8 +27,7 @@ export component MainWindow inherits Window {
 
         clock := Text {
             text: "00:00";
-            //color: white;
-            font-family: "Ubuntu";
+            color: white;
             font-size: 270px;
             font-weight: 500;
             horizontal-alignment: center;
