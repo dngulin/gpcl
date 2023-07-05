@@ -1,5 +1,6 @@
 import { GamepadModel, GamepadList } from "gamepad-list.slint";
 import { AppIconModel, AppIconList } from "appicon-list.slint";
+import { Background } from "background.slint";
 
 export component MainWindow inherits Window {
     in property <[GamepadModel]> gamepad_list <=> gamepad-list.model;
@@ -11,11 +12,8 @@ export component MainWindow inherits Window {
 
     forward-focus: app-list;
 
-    bg := Image {
-        width: 100%;
-        height: 100%;
-        image-fit: fill;
-        source: @image-url("img/bg.svg");
+    bg := Background {
+        background: #166dbb;
     }
 
     VerticalLayout {

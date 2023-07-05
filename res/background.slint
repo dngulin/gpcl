@@ -1,0 +1,97 @@
+struct Point {
+    x: float,
+    y: float,
+}
+
+
+component Path3 inherits Path {
+    width: 100%;
+    height: 100%;
+    viewbox-width: self.width / 1px;
+    viewbox-height: self.height / 1px;
+
+    in property <Point> a;
+    in property <Point> b;
+    in property <Point> c;
+    
+    MoveTo { x: root.viewbox-width * root.a.x; y: root.viewbox-height * root.a.y; }
+    LineTo { x: root.viewbox-width * root.b.x; y: root.viewbox-height * root.b.y; }
+    LineTo { x: root.viewbox-width * root.c.x; y: root.viewbox-height * root.c.y; }
+    Close {}
+}
+
+component Path4 inherits Path {
+    width: 100%;
+    height: 100%;
+    viewbox-width: self.width / 1px;
+    viewbox-height: self.height / 1px;
+
+    in property <Point> a;
+    in property <Point> b;
+    in property <Point> c;
+    in property <Point> d;
+
+    MoveTo { x: root.viewbox-width * root.a.x; y: root.viewbox-height * root.a.y; }
+    LineTo { x: root.viewbox-width * root.b.x; y: root.viewbox-height * root.b.y; }
+    LineTo { x: root.viewbox-width * root.c.x; y: root.viewbox-height * root.c.y; }
+    LineTo { x: root.viewbox-width * root.d.x; y: root.viewbox-height * root.d.y; }
+    Close {}
+}
+
+export component Background inherits Rectangle {
+    Path3 {
+        fill: #ffffff1a;
+        a: {x: 0, y: 0};
+        b: {x: 0.489, y: 0};
+        c: {x: 0, y: 0.139 };
+    }
+    Path4 {
+        fill: #ffffff13;
+        a: {x: 0, y: 0.139};
+        b: {x: 0.489, y: 0};
+        c: {x: 0.662, y: 0};
+        d: {x: 0, y: 0.609};
+    }
+    Path4 {
+        fill: #ffffff0d;
+        a: {x: 0, y: 0.609};
+        b: {x: 0.662, y: 0};
+        c: {x: 0.737, y: 0};
+        d: {x: 0, y: 0.704};
+    }
+    Path4 {
+        fill: #ffffff06;
+        a: {x: 0, y: 0.704};
+        b: {x: 0.737, y: 0};
+        c: {x: 0.848, y: 0};
+        d: {x: 0, y: 0.711};
+    }
+
+    Path3 {
+        fill: #0000001a;
+        a: {x: 1, y: 1};
+        b: {x: 0.531, y: 1};
+        c: {x: 1, y: 0.894};
+    }
+    Path4 {
+        fill: #00000013;
+        a: {x: 1, y: 0.894};
+        b: {x: 0.531, y: 1};
+        c: {x: 0.387, y: 1};
+        d: {x: 1, y: 0.716};
+    }
+    Path4 {
+        fill: #0000000d;
+        a: {x: 1, y: 0.716};
+        b: {x: 0.387, y: 1};
+        c: {x: 0.325, y: 1};
+        d: {x: 1, y: 0.483};
+    }
+    Path4 {
+        fill: #00000006;
+        a: {x: 1, y: 0.483};
+        b: {x: 0.325, y: 1};
+        c: {x: 0.141, y: 1};
+        d: {x: 1, y: 0.416};
+    }
+}
