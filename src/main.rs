@@ -2,13 +2,14 @@ mod config;
 mod gamepad_manager;
 mod launcher;
 mod slint_models;
+mod winit;
 
 use config::Config;
 use gamepad_manager::GamepadManager;
 use launcher::Launcher;
-use std::cell::RefCell;
 
 use slint::{SharedString, Timer, TimerMode};
+use std::cell::RefCell;
 use std::fs;
 use std::rc::Rc;
 use std::time::Duration;
@@ -21,6 +22,9 @@ fn main() {
     env_logger::builder()
         .filter_level(log::LevelFilter::Debug)
         .init();
+
+    winit::set_as_backend().unwrap();
+    std::env::set_var("SLINT_FULLSCREEN", "1"); // Works only with winit
 
     let window = MainWindow::new().unwrap();
 

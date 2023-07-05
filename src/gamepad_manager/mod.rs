@@ -9,13 +9,13 @@ use model::{gamepad_to_model_item, TrackingState, UpdatePowerInfo};
 
 use gilrs::ev::filter::{axis_dpad_to_button, deadzone, Jitter, Repeat};
 use gilrs::{EventType, Filter, GamepadId, Gilrs, GilrsBuilder, PowerInfo};
-use i_slint_backend_winit::WinitWindowAccessor;
 use slint::platform::WindowEvent;
 use slint::Window;
 use std::rc::Rc;
 use std::time::Duration;
 
 use crate::slint_models::ExtVecModel;
+use crate::winit::WinitWindow;
 use crate::GamepadModel;
 
 pub struct GamepadManager {
@@ -46,7 +46,7 @@ impl GamepadManager {
     }
 
     pub fn poll(&mut self, window: &Window) {
-        let has_focus = window.with_winit_window(|ww| ww.has_focus()).unwrap();
+        let has_focus = window.has_focus();
 
         let gilrs = &mut self.gilrs;
         let jitter = Jitter::new();
