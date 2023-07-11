@@ -1,14 +1,14 @@
 [package]
 name = "gpcl"
 description = "Gamepad controlled application launcher written in Rust & QML"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 license = "MIT"
 readme = "README.md"
 
 [dependencies]
-slint = { version = "1.1.0", default-features = false, features = ["std", "backend-winit-wayland", "renderer-winit-femtovg", "compat-1-0",] }
-i-slint-backend-winit = "1.1.0"
+slint = { version = "1.1.1", default-features = false, features = ["std", "backend-winit-wayland", "renderer-winit-femtovg", "compat-1-0",] }
+i-slint-backend-winit = "1.1.1"
 toml = "0.7.3"
 serde = "1.0.163"
 serde_derive = "1.0.163"
@@ -19,4 +19,4 @@ env_logger = "0.10.0"
 chrono = "0.4.24"
 
 [build-dependencies]
-slint-build = "1.1.0"
+slint-build = "1.1.1"
