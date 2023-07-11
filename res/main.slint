@@ -2,6 +2,12 @@ import { GamepadModel, GamepadList } from "gamepad-list.slint";
 import { AppIconModel, AppIconList } from "appicon-list.slint";
 import { Background } from "background.slint";
 
+export global ScreenLayout {
+    in property <length> top-panel-height: 32px;
+    in property <length> clock-height: 270px;
+    in property <length> icon-size: 128px;
+}
+
 export component MainWindow inherits Window {
     in property <[GamepadModel]> gamepad_list <=> gamepad-list.model;
     in property <[AppIconModel]> app_list <=> app-list.model;
@@ -22,15 +28,13 @@ export component MainWindow inherits Window {
         alignment: stretch;
 
         gamepad-list := GamepadList {
-            height: 32px;
+            height: ScreenLayout.top-panel-height;
             alignment: end;
         }
 
         clock := Text {
-            text: "00:00";
             color: white;
-            font-size: 270px;
-            font-weight: 500;
+            font-size: ScreenLayout.clock-height;
             horizontal-alignment: center;
             vertical-alignment: center;
             wrap: word-wrap;
@@ -39,7 +43,7 @@ export component MainWindow inherits Window {
         HorizontalLayout {
             alignment: center;
             app-list := AppIconList {
-                icon-size: 128px;
+                icon-size: ScreenLayout.icon-size;
             }
         }
 
