@@ -10,8 +10,7 @@ export component GamepadList inherits HorizontalLayout {
     in property <[GamepadModel]> model;
 
     spacing: self.height / 16;
-    padding-left: self.spacing;
-    padding-right: self.spacing;
+    padding: self.spacing;
 
     for item[index] in model: Gamepad {
         name: item.name;
