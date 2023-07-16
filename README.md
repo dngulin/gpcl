@@ -6,9 +6,11 @@ It displays a list of connected gamepads, a clock and a row of applications to r
 The launcher is designed to respect gamepad inputs:
 d-pad buttons work as arrow keys and the bottom action button works as enter.
 
+Lucide icons are used for gamepad status indication.
+
 ![Screenshot](screenshot.png)
 
-*Now the project is on an early development stage*
+*Now the project is on the early development stage*
 
 ## Build
 
