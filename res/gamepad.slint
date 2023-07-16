@@ -1,8 +1,12 @@
 global GamepadStatusIcon {
     out property <image> charging: @image-url("img/gamepad-status/charging.svg");
-    out property <image> discharging: @image-url("img/gamepad-status/discharging.svg");
     out property <image> unknown: @image-url("img/gamepad-status/unknown.svg");
     out property <image> wired: @image-url("img/gamepad-status/wired.svg");
+
+    out property <image> battery-empty: @image-url("img/gamepad-status/battery-empty.svg");
+    out property <image> battery-low: @image-url("img/gamepad-status/battery-low.svg");
+    out property <image> battery-medium: @image-url("img/gamepad-status/battery-medium.svg");
+    out property <image> battery-full: @image-url("img/gamepad-status/battery-full.svg");
 }
 
 export enum GamepadStatus {
@@ -54,7 +58,7 @@ export component Gamepad inherits Rectangle {
         }
         if status != GamepadStatus.Wired: Icon {
             size: root.height;
-            source: getStatusIcon(status);
+            source: getStatusIcon(status, charge);
         }
     }
 
@@ -66,13 +70,25 @@ export component Gamepad inherits Rectangle {
         return false;
     }
 
-    function getStatusIcon(status: GamepadStatus) -> image {
+    function getStatusIcon(status: GamepadStatus, charge: int) -> image {
         if (status == GamepadStatus.Wired) {
             return GamepadStatusIcon.wired;
         }
 
         if (status == GamepadStatus.Discharging) {
-            return GamepadStatusIcon.discharging;
+            if (charge >= 85) {
+                return GamepadStatusIcon.battery-full;
+            }
+
+            if (charge >= 33) {
+                return GamepadStatusIcon.battery-medium;
+            }
+
+            if (charge >= 10) {
+                return GamepadStatusIcon.battery-low;
+            }
+
+            return GamepadStatusIcon.battery-empty;
         }
 
         if (status == GamepadStatus.Charging) {
