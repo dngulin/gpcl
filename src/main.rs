@@ -7,6 +7,7 @@ mod winit;
 use config::{Config, LayoutConfig};
 use gamepad_manager::GamepadManager;
 use launcher::Launcher;
+use winit::WinitWindow;
 
 use slint::{SharedString, Timer, TimerMode};
 use std::cell::RefCell;
@@ -27,6 +28,8 @@ fn main() {
     std::env::set_var("SLINT_FULLSCREEN", "1"); // Works only with winit
 
     let window = MainWindow::new().unwrap();
+    window.window().hide_cursor();
+
     let launcher = Launcher::new();
     load_and_apply_config(&window, &launcher);
 
