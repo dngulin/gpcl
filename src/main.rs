@@ -40,7 +40,6 @@ fn main() {
     let _clock_timer = setup_clock(&window);
     let _launcher_timer = setup_launcher(&window, launcher);
 
-    take_focus_hack(&window);
     window.run().unwrap();
 }
 
@@ -150,14 +149,4 @@ fn setup_launcher(window: &MainWindow, launcher: Rc<RefCell<Launcher>>) -> Timer
     });
 
     child_poll_timer
-}
-
-// Workaround for https://github.com/slint-ui/slint/issues/2201
-fn take_focus_hack(window: &MainWindow) {
-    window
-        .as_weak()
-        .upgrade_in_event_loop(move |window| {
-            window.invoke_take_focus_workaround();
-        })
-        .unwrap();
 }

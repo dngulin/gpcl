@@ -87,9 +87,4 @@ export component MainWindow inherits Window {
     public function set_child_process_state(is_running: bool) {
         app-list.is-interactive = !is_running;
     }
-
-    // Workaround for https://github.com/slint-ui/slint/issues/2201
-    public function take_focus_workaround() {
-        root.focus();
-    }
 }
