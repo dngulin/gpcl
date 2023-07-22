@@ -5,6 +5,7 @@ pub fn btn_to_key(value: Button) -> Option<Key> {
     match value {
         Button::South => Some(Key::Return),
         Button::East => Some(Key::Escape),
+        Button::North => Some(Key::F5),
         Button::DPadUp => Some(Key::UpArrow),
         Button::DPadDown => Some(Key::DownArrow),
         Button::DPadLeft => Some(Key::LeftArrow),

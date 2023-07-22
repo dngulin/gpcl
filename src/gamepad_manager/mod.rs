@@ -36,7 +36,7 @@ impl GamepadManager {
             .filter(|(_, g)| g.is_connected())
             .map(|(_, g)| gamepad_to_model_item(g))
             .collect();
-        let gamepads = Rc::new(ExtVecModel::new(gamepads));
+        let gamepads = Rc::new(ExtVecModel::with_items(gamepads));
 
         Ok(Self { gilrs, gamepads })
     }

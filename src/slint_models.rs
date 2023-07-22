@@ -28,10 +28,26 @@ impl<TModel: Clone + 'static, TExt: 'static> Model for ExtVecModel<TModel, TExt>
 }
 
 impl<TModel, TExt> ExtVecModel<TModel, TExt> {
-    pub fn new(items: Vec<(TModel, TExt)>) -> Self {
+    pub fn new() -> Self {
+        Self {
+            items: RefCell::new(Vec::new()),
+            notify: ModelNotify::default(),
+        }
+    }
+
+    pub fn with_items(items: Vec<(TModel, TExt)>) -> Self {
         Self {
             items: RefCell::new(items),
             notify: ModelNotify::default(),
+        }
+    }
+
+    pub fn clear(&self) {
+        let len = self.items.borrow().len();
+        self.items.borrow_mut().clear();
+
+        if len > 0 {
+            self.notify.row_removed(0, len);
         }
     }
 

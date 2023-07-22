@@ -4,11 +4,10 @@ mod launcher;
 mod slint_models;
 mod winit;
 
-use config::Config;
+use config::{Config, LayoutConfig};
 use gamepad_manager::GamepadManager;
 use launcher::Launcher;
 
-use crate::config::{AppIconConfig, LayoutConfig};
 use slint::{SharedString, Timer, TimerMode};
 use std::cell::RefCell;
 use std::fs;
@@ -24,48 +23,73 @@ fn main() {
         .filter_level(log::LevelFilter::Debug)
         .init();
 
-    let config = load_config();
-
     winit::set_as_backend().unwrap();
     std::env::set_var("SLINT_FULLSCREEN", "1"); // Works only with winit
 
     let window = MainWindow::new().unwrap();
+    let launcher = Launcher::new();
+    load_and_apply_config(&window, &launcher);
 
-    if let Some(layout) = &config.layout {
-        set_layout(&window, layout);
-    }
+    let launcher = Rc::new(RefCell::new(launcher));
+    setup_config_reloading(&window, launcher.clone());
 
     let _gp_poll_timer = setup_gamepad_manager(&window);
     let _clock_timer = setup_clock(&window);
-    let _launcher_timer = setup_launcher(&window, &config.items);
+    let _launcher_timer = setup_launcher(&window, launcher);
 
     take_focus_hack(&window);
     window.run().unwrap();
 }
 
-fn load_config() -> Config {
+fn load_config_file() -> Config {
     let xdg_dirs = xdg::BaseDirectories::new().unwrap();
-
     let config_path = xdg_dirs.get_config_file(CONFIG_FILE_NAME);
-    let contents = fs::read_to_string(config_path).unwrap();
 
-    toml::from_str::<Config>(&contents).unwrap()
+    let contents = match fs::read_to_string(config_path) {
+        Ok(contents) => contents,
+        Err(error) => {
+            log::error!("Failed to open config: {}", error);
+            return Config::default();
+        }
+    };
+
+    match toml::from_str::<Config>(&contents) {
+        Ok(config) => config,
+        Err(error) => {
+            log::error!("Failed to parse config: {}", error);
+            Config::default()
+        }
+    }
 }
 
-fn set_layout(window: &MainWindow, layout_config: &LayoutConfig) {
+fn load_and_apply_config(window: &MainWindow, launcher: &Launcher) {
+    let config = load_config_file();
+
     let layout = window.global::<ScreenLayout>();
+    let layout_config = config.layout.unwrap_or_default();
+    set_window_layout(&layout, &layout_config);
 
-    if let Some(top_panel_height) = layout_config.top_panel_height {
-        layout.set_top_panel_height(top_panel_height);
-    }
+    launcher.reset_items(&config.items);
+}
 
-    if let Some(clock_height) = layout_config.clock_height {
-        layout.set_clock_height(clock_height);
-    }
+fn set_window_layout(layout: &ScreenLayout, config: &LayoutConfig) {
+    let default_panel_height = layout.get_default_top_panel_height();
+    layout.set_top_panel_height(config.top_panel_height.unwrap_or(default_panel_height));
 
-    if let Some(icon_size) = layout_config.icon_size {
-        layout.set_icon_size(icon_size);
-    }
+    let default_clock_height = layout.get_default_clock_height();
+    layout.set_clock_height(config.clock_height.unwrap_or(default_clock_height));
+
+    let default_icon_size = layout.get_default_icon_size();
+    layout.set_icon_size(config.icon_size.unwrap_or(default_icon_size));
+}
+
+fn setup_config_reloading(window: &MainWindow, launcher: Rc<RefCell<Launcher>>) {
+    let window_weak = window.as_weak();
+    window.on_reload_pressed(move || {
+        if let Some(window) = window_weak.upgrade() {
+            load_and_apply_config(&window, &launcher.borrow());
+        }
+    });
 }
 
 fn setup_gamepad_manager(window: &MainWindow) -> Timer {
@@ -104,11 +128,8 @@ fn get_time_string() -> SharedString {
     time.format("%H:%M").to_string().into()
 }
 
-fn setup_launcher(window: &MainWindow, icons: &[AppIconConfig]) -> Timer {
-    let launcher = Launcher::new(icons);
-    window.set_app_list(launcher.model().into());
-
-    let launcher = Rc::new(RefCell::new(launcher));
+fn setup_launcher(window: &MainWindow, launcher: Rc<RefCell<Launcher>>) -> Timer {
+    window.set_app_list(launcher.borrow().model().into());
 
     {
         let launcher = launcher.clone();

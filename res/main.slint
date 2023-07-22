@@ -3,9 +3,13 @@ import { AppIconModel, AppIconList } from "appicon-list.slint";
 import { Background } from "background.slint";
 
 export global ScreenLayout {
-    in property <length> top-panel-height: 32px;
-    in property <length> clock-height: 270px;
-    in property <length> icon-size: 128px;
+    out property <length> default-top-panel-height: 32px;
+    out property <length> default-clock-height: 270px;
+    out property <length> default-icon-size: 128px;
+
+    in property <length> top-panel-height: default-top-panel-height;
+    in property <length> clock-height: default-clock-height;
+    in property <length> icon-size: default-icon-size;
 }
 
 export component MainWindow inherits Window {
@@ -14,11 +18,37 @@ export component MainWindow inherits Window {
 
     in property <string> clock_text <=> clock.text;
 
-    callback app_icon_activated <=> app-list.item_activated;
+    callback app_icon_activated(int);
+    callback reload_pressed;
 
     default-font-family: "Ubuntu";
     default-font-weight: 550;
-    forward-focus: app-list;
+    forward-focus: focus-scope;
+
+    focus-scope := FocusScope {
+        key-pressed(event) => {
+            if (app-list.is-interactive) {
+                if (event.text == Key.RightArrow) {
+                    app-list.move_selection_right();
+                } else
+                if (event.text == Key.LeftArrow) {
+                    app-list.move_selection_left();
+                } else
+                if (event.text == Key.Return) {
+                    root.app_icon_activated(app-list.selected-index);
+                    app-list.is-interactive = false;
+                }
+            }
+            accept
+        }
+        key-released(event) => {
+            if (event.text == Key.F5) {
+                root.reload_pressed();
+                app-list.invalidate_state();
+            }
+            accept
+        }
+    }
 
     bg := Background {
         background: #166dbb;

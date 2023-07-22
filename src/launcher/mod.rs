@@ -16,12 +16,17 @@ pub struct Launcher {
 }
 
 impl Launcher {
-    pub fn new(items: &[AppIconConfig]) -> Self {
-        let items = items.iter().map(config_entry_into_item).collect();
-
+    pub fn new() -> Self {
         Self {
-            items: Rc::new(ExtVecModel::new(items)),
+            items: Rc::new(ExtVecModel::new()),
             child_process: None,
+        }
+    }
+
+    pub fn reset_items(&self, items: &[AppIconConfig]) {
+        self.items.clear();
+        for item in items.iter().map(config_entry_into_item) {
+            self.items.add(item);
         }
     }
 
