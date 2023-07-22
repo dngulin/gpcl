@@ -14,6 +14,7 @@ serde = "1.0.163"
 serde_derive = "1.0.163"
 xdg = "2.5.0"
 gilrs = "0.10.2"
+gilrs-core = "~0.5.6" # use a version with the fix: https://gitlab.com/gilrs-project/gilrs/-/merge_requests/95
 log = "0.4.17"
 env_logger = "0.10.0"
 chrono = "0.4.24"
