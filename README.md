@@ -63,7 +63,7 @@ Note that layout parameters are defined in _logical_ pixels.
 The launcher is written in Rust, so it is built with `cargo`.
 
 It uses `Slint` as a graphical toolkit and uses `winit` as a backend
-(required for checking window focus).
+(required to work with windowing API not provided by `Slint`).
 
 Now project is configured to work only in wayland environment,
 but it can be easily changed for X11 support.
