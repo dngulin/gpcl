@@ -1001,7 +1001,7 @@ dependencies = [
 
 [[package]]
 name = "gpcl"
-version = "0.5.0"
+version = "0.5.2"
 dependencies = [
  "chrono",
  "env_logger",
