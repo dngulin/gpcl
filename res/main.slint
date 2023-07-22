@@ -13,6 +13,8 @@ export global ScreenLayout {
 }
 
 export component MainWindow inherits Window {
+    title: "GPCL";
+
     in property <[GamepadModel]> gamepad_list <=> gamepad-list.model;
     in property <[AppIconModel]> app_list <=> app-list.model;
 
