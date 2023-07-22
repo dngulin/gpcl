@@ -1,3 +1,4 @@
+mod clock;
 mod config;
 mod gamepad_manager;
 mod launcher;
@@ -9,7 +10,8 @@ use gamepad_manager::GamepadManager;
 use launcher::Launcher;
 use winit::WinitWindow;
 
-use slint::{SharedString, Timer, TimerMode};
+use crate::clock::ClockTracker;
+use slint::{Timer, TimerMode};
 use std::cell::RefCell;
 use std::fs;
 use std::rc::Rc;
@@ -111,23 +113,23 @@ fn setup_gamepad_manager(window: &MainWindow) -> Timer {
 }
 
 fn setup_clock(window: &MainWindow) -> Timer {
-    window.set_clock_text(get_time_string());
+    let mut clock_tracker = ClockTracker::new();
+    window.set_clock_text(clock_tracker.time_str().into());
 
+    let tracker_cell = Rc::new(RefCell::new(clock_tracker));
     let window_weak = window.as_weak();
     let clock_timer = Timer::default();
 
-    clock_timer.start(TimerMode::Repeated, Duration::from_millis(400), move || {
+    clock_timer.start(TimerMode::Repeated, Duration::from_millis(500), move || {
         if let Some(window) = window_weak.upgrade() {
-            window.set_clock_text(get_time_string());
+            let mut tracker = tracker_cell.borrow_mut();
+            if tracker.update() {
+                window.set_clock_text(tracker.time_str().into());
+            }
         }
     });
 
     clock_timer
-}
-
-fn get_time_string() -> SharedString {
-    let time = chrono::Local::now().time();
-    time.format("%H:%M").to_string().into()
 }
 
 fn setup_launcher(window: &MainWindow, launcher: Rc<RefCell<Launcher>>) -> Timer {
