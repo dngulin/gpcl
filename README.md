@@ -19,7 +19,7 @@ The launcher converts gamepad inputs into keyboard ones.
 
 ## Configuration
 
-The config file should be located at `$XDG_CONFIG_HOME/gcpl.toml`.
+The config file should be located at `$XDG_CONFIG_HOME/gpcl.toml`.
 You can configure window layout and define application list. 
 
 Example config:
