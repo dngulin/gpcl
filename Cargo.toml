@@ -1,23 +1,22 @@
 [package]
 name = "gpcl"
 description = "Gamepad controlled application launcher written in Rust & QML"
-version = "0.5.4"
+version = "0.5.5"
 edition = "2021"
 license = "MIT"
 readme = "README.md"
 
 [dependencies]
-slint = { version = "1.1.1", default-features = false, features = ["std", "backend-winit-wayland", "renderer-winit-femtovg", "compat-1-0",] }
-i-slint-backend-winit = "1.1.1"
-toml = "0.7.3"
-serde = "1.0.163"
-serde_derive = "1.0.163"
-xdg = "2.5.0"
-gilrs = "0.10.2"
-gilrs-core = "~0.5.6" # use a version with the fix: https://gitlab.com/gilrs-project/gilrs/-/merge_requests/95
-log = "0.4.17"
-env_logger = "0.10.0"
-chrono = "0.4.24"
+slint = { version = "1.2", default-features = false, features = ["std", "backend-winit-wayland", "renderer-winit-femtovg", "compat-1-0",] }
+i-slint-backend-winit = "1.2"
+toml = "0.8"
+serde = "1.0"
+serde_derive = "1.0"
+xdg = "2.5"
+gilrs = "0.10"
+log = "0.4"
+env_logger = "0.10"
+chrono = "0.4"
 
 [build-dependencies]
-slint-build = "1.1.1"
+slint-build = "1.2"
