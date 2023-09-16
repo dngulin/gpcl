@@ -1,6 +1,6 @@
 [package]
 name = "gpcl"
-description = "Gamepad controlled application launcher written in Rust & QML"
+description = "Gamepad controlled application launcher written in Rust & Slint"
 version = "0.5.5"
 edition = "2021"
 license = "MIT"
