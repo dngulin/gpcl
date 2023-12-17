@@ -56,13 +56,10 @@ fn load_config_file() -> Config {
         }
     };
 
-    match toml::from_str::<Config>(&contents) {
-        Ok(config) => config,
-        Err(error) => {
-            log::error!("Failed to parse config: {}", error);
-            Config::default()
-        }
-    }
+    toml::from_str::<Config>(&contents).unwrap_or_else(|error| {
+        log::error!("Failed to parse config: {}", error);
+        Config::default()
+    })
 }
 
 fn load_and_apply_config(window: &MainWindow, launcher: &Launcher) {

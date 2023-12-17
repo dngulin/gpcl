@@ -28,13 +28,10 @@ impl Executable {
 }
 
 pub fn config_entry_into_item(config: &AppIconConfig) -> (AppIconModel, Executable) {
-    let image = match Image::load_from_path(Path::new(config.icon.as_str())) {
-        Ok(image) => image,
-        Err(_) => {
-            log::error!("Filed to load image: `{}`", config.icon);
-            Image::default()
-        }
-    };
+    let image = Image::load_from_path(Path::new(config.icon.as_str())).unwrap_or_else(|_| {
+        log::error!("Filed to load image: `{}`", config.icon);
+        Image::default()
+    });
     let name = (&config.name).into();
 
     let model = AppIconModel { image, name };
