@@ -6,8 +6,13 @@ edition = "2021"
 license = "MIT"
 readme = "README.md"
 
+[features]
+default = ["wayland"]
+wayland = ["slint/backend-winit-wayland"]
+x11 = ["slint/backend-winit-x11"]
+
 [dependencies]
-slint = { version = "1.3", default-features = false, features = ["std", "backend-winit-wayland", "renderer-winit-femtovg", "compat-1-0",] }
+slint = { version = "1.3", default-features = false, features = ["std", "renderer-winit-femtovg", "compat-1-0",] }
 i-slint-backend-winit = "1.3"
 toml = "0.8"
 serde = "1.0"
