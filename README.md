@@ -60,11 +60,11 @@ Note that layout parameters are defined in _logical_ pixels.
 
 ## Build
 
-The launcher is written in Rust, so it is built with `cargo`.
-
-It uses `Slint` as a graphical toolkit and uses `winit` as a backend
+The launcher is written in Rust, so it is built with `cargo`.  It uses `Slint` as a graphical toolkit and uses `winit` as a backend
 (required to work with windowing API not provided by `Slint`).
 
-Now project is configured to work only in wayland environment,
-but it can be easily changed for X11 support.
-For details see the [slint feature list](https://docs.rs/slint/1.1.1/slint/#feature-flags).
+ You can build it for Wayland, X11 or for both platforms using `wayland` (default) and `x11` features:
+ 
+- `cargo build --release` produces the Wayland-only build,
+- `cargo build --release --features x11` produces the universal build that support both Wayland and X11
+- `cargo build --release --no-default-features --features x11` produces the X11-only build
