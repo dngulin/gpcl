@@ -26,7 +26,6 @@ fn main() {
         .filter_level(log::LevelFilter::Debug)
         .init();
 
-    winit::set_as_backend().unwrap();
     std::env::set_var("SLINT_FULLSCREEN", "1"); // Works only with winit
 
     let window = MainWindow::new().unwrap();
