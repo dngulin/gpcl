@@ -1126,7 +1126,7 @@ dependencies = [
 
 [[package]]
 name = "gpcl"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "chrono",
  "env_logger",
@@ -1226,7 +1226,6 @@ version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "565ece613df99476e516a8a3c853269795fc06b553f66ed0a8f7159d4cb5c975"
 dependencies = [
- "bytemuck",
  "cfg-if",
  "cfg_aliases",
  "cocoa",
@@ -1240,12 +1239,10 @@ dependencies = [
  "i-slint-core-macros",
  "i-slint-renderer-femtovg",
  "i-slint-renderer-skia",
- "imgref",
  "lyon_path",
  "once_cell",
  "pin-weak",
  "raw-window-handle 0.5.2",
- "rgb",
  "scoped-tls-hkt",
  "scopeguard",
  "send_wrapper",
@@ -1305,13 +1302,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "462a3ca4e929f66d39a00436257baa5a4fb3e287c16675f2219757b67b2dad94"
 dependencies = [
  "auto_enums",
- "bytemuck",
  "cfg-if",
  "clru",
  "const-field-offset",
  "derive_more",
  "euclid",
- "fontdue",
  "i-slint-common",
  "i-slint-core-macros",
  "image",
@@ -1327,7 +1322,6 @@ dependencies = [
  "portable-atomic",
  "resvg",
  "rgb",
- "rustybuzz 0.11.0",
  "scoped-tls-hkt",
  "scopeguard",
  "slab",
