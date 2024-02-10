@@ -26,9 +26,8 @@ fn main() {
         .filter_level(log::LevelFilter::Debug)
         .init();
 
-    std::env::set_var("SLINT_FULLSCREEN", "1"); // Works only with winit
-
     let window = MainWindow::new().unwrap();
+    window.window().set_fullscreen(true);
     window.window().hide_cursor();
 
     let launcher = Launcher::new();
