@@ -68,11 +68,14 @@ impl GamepadManager {
             let gamepad_id = event.id;
 
             match event.event {
-                EventType::ButtonPressed(btn, _) | EventType::ButtonRepeated(btn, _)
-                    if has_focus =>
-                {
+                EventType::ButtonPressed(btn, _) if has_focus => {
                     if let Some(key) = keymap::btn_to_key(btn) {
                         window.dispatch_event(WindowEvent::KeyPressed { text: key.into() });
+                    }
+                }
+                EventType::ButtonRepeated(btn, _) if has_focus => {
+                    if let Some(key) = keymap::btn_to_key(btn) {
+                        window.dispatch_event(WindowEvent::KeyPressRepeated { text: key.into() });
                     }
                 }
                 EventType::ButtonReleased(btn, _) if has_focus => {
