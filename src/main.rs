@@ -26,21 +26,23 @@ fn main() {
         .filter_level(log::LevelFilter::Debug)
         .init();
 
-    let window = MainWindow::new().unwrap();
-    window.window().set_fullscreen(true);
-    window.window().hide_cursor();
+    let app = GpclApp::new().unwrap();
+
+    let window = app.window();
+    window.set_fullscreen(true);
+    window.hide_cursor();
 
     let launcher = Launcher::new();
-    load_and_apply_config(&window, &launcher);
+    load_and_apply_config(&app, &launcher);
 
     let launcher = Rc::new(RefCell::new(launcher));
-    setup_config_reloading(&window, launcher.clone());
+    setup_config_reloading(&app, launcher.clone());
 
-    let _gp_poll_timer = setup_gamepad_manager(&window);
-    let _clock_timer = setup_clock(&window);
-    let _launcher_timer = setup_launcher(&window, launcher);
+    let _gp_poll_timer = setup_gamepad_manager(&app);
+    let _clock_timer = setup_clock(&app);
+    let _launcher_timer = setup_launcher(&app, launcher);
 
-    window.run().unwrap();
+    app.run().unwrap();
 }
 
 fn load_config_file() -> Config {
@@ -61,10 +63,10 @@ fn load_config_file() -> Config {
     })
 }
 
-fn load_and_apply_config(window: &MainWindow, launcher: &Launcher) {
+fn load_and_apply_config(app: &GpclApp, launcher: &Launcher) {
     let config = load_config_file();
 
-    let layout = window.global::<ScreenLayout>();
+    let layout = app.global::<ScreenLayout>();
     let layout_config = config.layout.unwrap_or_default();
     set_window_layout(&layout, &layout_config);
 
@@ -82,44 +84,44 @@ fn set_window_layout(layout: &ScreenLayout, config: &LayoutConfig) {
     layout.set_icon_size(config.icon_size.unwrap_or(default_icon_size));
 }
 
-fn setup_config_reloading(window: &MainWindow, launcher: Rc<RefCell<Launcher>>) {
-    let window_weak = window.as_weak();
-    window.on_reload_pressed(move || {
-        if let Some(window) = window_weak.upgrade() {
-            load_and_apply_config(&window, &launcher.borrow());
+fn setup_config_reloading(app: &GpclApp, launcher: Rc<RefCell<Launcher>>) {
+    let app_weak = app.as_weak();
+    app.on_reload_pressed(move || {
+        if let Some(app) = app_weak.upgrade() {
+            load_and_apply_config(&app, &launcher.borrow());
         }
     });
 }
 
-fn setup_gamepad_manager(window: &MainWindow) -> Timer {
+fn setup_gamepad_manager(app: &GpclApp) -> Timer {
     let mut gamepad_manager = GamepadManager::new().unwrap();
-    window.set_gamepad_list(gamepad_manager.model().into());
+    app.set_gamepad_list(gamepad_manager.model().into());
 
-    let window_weak = window.as_weak();
+    let app_weak = app.as_weak();
     let gamepad_poll_timer = Timer::default();
 
     gamepad_poll_timer.start(TimerMode::Repeated, Duration::from_millis(16), move || {
-        if let Some(window) = window_weak.upgrade() {
-            gamepad_manager.poll(window.window());
+        if let Some(app) = app_weak.upgrade() {
+            gamepad_manager.poll(app.window());
         }
     });
 
     gamepad_poll_timer
 }
 
-fn setup_clock(window: &MainWindow) -> Timer {
+fn setup_clock(app: &GpclApp) -> Timer {
     let mut clock_tracker = ClockTracker::new();
-    window.set_clock_text(clock_tracker.time_str().into());
+    app.set_clock_text(clock_tracker.time_str().into());
 
     let tracker_cell = Rc::new(RefCell::new(clock_tracker));
-    let window_weak = window.as_weak();
+    let app_weak = app.as_weak();
     let clock_timer = Timer::default();
 
     clock_timer.start(TimerMode::Repeated, Duration::from_millis(500), move || {
-        if let Some(window) = window_weak.upgrade() {
+        if let Some(app) = app_weak.upgrade() {
             let mut tracker = tracker_cell.borrow_mut();
             if tracker.update() {
-                window.set_clock_text(tracker.time_str().into());
+                app.set_clock_text(tracker.time_str().into());
             }
         }
     });
@@ -127,21 +129,21 @@ fn setup_clock(window: &MainWindow) -> Timer {
     clock_timer
 }
 
-fn setup_launcher(window: &MainWindow, launcher: Rc<RefCell<Launcher>>) -> Timer {
-    window.set_app_list(launcher.borrow().model().into());
+fn setup_launcher(app: &GpclApp, launcher: Rc<RefCell<Launcher>>) -> Timer {
+    app.set_app_list(launcher.borrow().model().into());
 
     {
         let launcher = launcher.clone();
-        window.on_app_icon_activated(move |idx| launcher.borrow_mut().exec_item(idx as usize));
+        app.on_app_icon_activated(move |idx| launcher.borrow_mut().exec_item(idx as usize));
     }
 
-    let window_weak = window.as_weak();
+    let app_weak = app.as_weak();
     let child_poll_timer = Timer::default();
 
     child_poll_timer.start(TimerMode::Repeated, Duration::from_millis(250), move || {
-        if let Some(window) = window_weak.upgrade() {
+        if let Some(app) = app_weak.upgrade() {
             let is_running = launcher.borrow_mut().check_if_child_is_running();
-            window.invoke_set_child_process_state(is_running);
+            app.invoke_set_child_process_state(is_running);
         }
     });
 
