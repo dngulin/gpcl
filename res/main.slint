@@ -1,6 +1,7 @@
 import { GamepadModel, GamepadList } from "gamepad-list.slint";
 import { AppIconModel, AppIconList } from "appicon-list.slint";
 import { Background } from "background.slint";
+import { Style } from "style.slint";
 
 export global ScreenLayout {
     out property <length> default-top-panel-height: 32px;
@@ -23,8 +24,8 @@ export component GpclApp inherits Window {
     callback app_icon_activated(int);
     callback reload_pressed;
 
-    default-font-family: "Ubuntu";
-    default-font-weight: 550;
+    default-font-family: Style.font-family;
+    default-font-weight: Style.font-weight;
     forward-focus: focus-scope;
 
     focus-scope := FocusScope {
@@ -51,7 +52,7 @@ export component GpclApp inherits Window {
     }
 
     bg := Background {
-        background: #166dbb;
+        background: Style.bg-color;
     }
 
     VerticalLayout {
@@ -63,7 +64,7 @@ export component GpclApp inherits Window {
         }
 
         clock := Text {
-            color: white;
+            color: Style.text-color;
             font-size: ScreenLayout.clock-height;
             horizontal-alignment: center;
             vertical-alignment: center;

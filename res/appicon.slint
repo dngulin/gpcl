@@ -1,3 +1,5 @@
+import { Style } from "style.slint";
+
 export component AppIcon {
     in property <length> size;
     in property <length> icon-size;
@@ -18,10 +20,11 @@ export component AppIcon {
                 height: icon-size;
             }
         }
+
         HorizontalLayout {
             alignment: center;
             Text {
-                color: white;
+                color: Style.text-color;
                 width: size * 0.9;
                 font-size: (size - icon-size) / 2;
                 text: icon-name;

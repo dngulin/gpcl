@@ -1,3 +1,5 @@
+import { Style } from "style.slint";
+
 global GamepadStatusIcon {
     out property <image> charging: @image-url("img/gamepad-status/charging.svg");
     out property <image> unknown: @image-url("img/gamepad-status/unknown.svg");
@@ -18,7 +20,7 @@ export enum GamepadStatus {
 
 // View Components
 component Label inherits Text {
-    color: white;
+    color: Style.text-color;
     font-size: self.height * 0.6;
     vertical-alignment: center;
     horizontal-alignment: right;
@@ -50,9 +52,11 @@ export component Gamepad inherits Rectangle {
             size: root.height;
             source: @image-url("img/gamepad.svg");
         }
+
         Label {
             text: name;
         }
+
         if isChargeVisible(status): Label {
             text: "| " + charge + "%";
         }
@@ -66,7 +70,6 @@ export component Gamepad inherits Rectangle {
         if (status == GamepadStatus.Charging || status == GamepadStatus.Discharging) {
             return true;
         }
-
         return false;
     }
 
@@ -74,27 +77,21 @@ export component Gamepad inherits Rectangle {
         if (status == GamepadStatus.Wired) {
             return GamepadStatusIcon.wired;
         }
-
         if (status == GamepadStatus.Discharging) {
             if (charge >= 85) {
                 return GamepadStatusIcon.battery-full;
             }
-
             if (charge >= 33) {
                 return GamepadStatusIcon.battery-medium;
             }
-
             if (charge >= 10) {
                 return GamepadStatusIcon.battery-low;
             }
-
             return GamepadStatusIcon.battery-empty;
         }
-
         if (status == GamepadStatus.Charging) {
             return GamepadStatusIcon.charging;
         }
-        
         return GamepadStatusIcon.unknown;
     }
 }
