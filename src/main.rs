@@ -11,6 +11,7 @@ use launcher::Launcher;
 use winit::WinitWindow;
 
 use crate::clock::ClockTracker;
+use crate::config::StyleConfig;
 use slint::{Timer, TimerMode};
 use std::cell::RefCell;
 use std::fs;
@@ -67,8 +68,10 @@ fn load_and_apply_config(app: &GpclApp, launcher: &Launcher) {
     let config = load_config_file();
 
     let layout = app.global::<ScreenLayout>();
-    let layout_config = config.layout.unwrap_or_default();
-    set_window_layout(&layout, &layout_config);
+    set_window_layout(&layout, &config.layout.unwrap_or_default());
+
+    let style = app.global::<Style>();
+    set_app_style(&style, &config.style.unwrap_or_default());
 
     launcher.reset_items(&config.items);
 }
@@ -82,6 +85,20 @@ fn set_window_layout(layout: &ScreenLayout, config: &LayoutConfig) {
 
     let default_icon_size = layout.get_default_icon_size();
     layout.set_icon_size(config.icon_size.unwrap_or(default_icon_size));
+}
+
+fn set_app_style(style: &Style, config: &StyleConfig) {
+    let font_family = config
+        .font
+        .as_ref()
+        .map(|s| s.into())
+        .unwrap_or(style.get_default_font_family());
+    style.set_font_family(font_family);
+
+    let font_weight = config
+        .font_weight
+        .unwrap_or(style.get_default_font_weight());
+    style.set_font_weight(font_weight);
 }
 
 fn setup_config_reloading(app: &GpclApp, launcher: Rc<RefCell<Launcher>>) {
