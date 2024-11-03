@@ -22,6 +22,7 @@ gilrs = "0.11"
 log = "0.4"
 env_logger = "0.11"
 chrono = "0.4"
+hex_color = "3.0.0"
 
 [build-dependencies]
 slint-build = "1.8"

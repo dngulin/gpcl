@@ -20,6 +20,9 @@ pub struct LayoutConfig {
 pub struct StyleConfig {
     pub font: Option<String>,
     pub font_weight: Option<i32>,
+    pub bg_color: Option<String>,
+    pub panel_color: Option<String>,
+    pub text_color: Option<String>,
 }
 
 #[derive(Deserialize)]

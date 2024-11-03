@@ -12,7 +12,8 @@ use winit::WinitWindow;
 
 use crate::clock::ClockTracker;
 use crate::config::StyleConfig;
-use slint::{Timer, TimerMode};
+use hex_color::HexColor;
+use slint::{Color, Timer, TimerMode};
 use std::cell::RefCell;
 use std::fs;
 use std::rc::Rc;
@@ -99,6 +100,26 @@ fn set_app_style(style: &Style, config: &StyleConfig) {
         .font_weight
         .unwrap_or(style.get_default_font_weight());
     style.set_font_weight(font_weight);
+
+    let bg_color = get_color(&config.bg_color).unwrap_or(style.get_default_bg_color());
+    style.set_bg_color(bg_color);
+
+    let panel_color = get_color(&config.panel_color).unwrap_or(style.get_default_panel_color());
+    style.set_panel_color(panel_color);
+
+    let text_color = get_color(&config.text_color).unwrap_or(style.get_default_text_color());
+    style.set_text_color(text_color);
+}
+
+fn get_color(value: &Option<String>) -> Option<Color> {
+    let value = value.as_ref()?;
+    match HexColor::parse(value) {
+        Ok(color) => Some(Color::from_argb_u8(color.a, color.r, color.g, color.b)),
+        Err(error) => {
+            log::error!("Failed to parse color `{}`: {}", value, error);
+            None
+        }
+    }
 }
 
 fn setup_config_reloading(app: &GpclApp, launcher: Rc<RefCell<Launcher>>) {
