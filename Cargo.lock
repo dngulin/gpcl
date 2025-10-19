@@ -1670,13 +1670,12 @@ dependencies = [
 
 [[package]]
 name = "gpcl"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "chrono",
  "env_logger",
  "gilrs",
  "hex_color",
- "i-slint-backend-winit",
  "log",
  "serde",
  "serde_derive",
@@ -3944,6 +3943,7 @@ checksum = "f467a64a49620e41807016dc1d519ba0ebb9d1322f734853059f93b8c3f3d2bd"
 dependencies = [
  "const-field-offset",
  "i-slint-backend-selector",
+ "i-slint-backend-winit",
  "i-slint-core",
  "i-slint-core-macros",
  "i-slint-renderer-femtovg",

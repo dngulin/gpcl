@@ -32,7 +32,9 @@ fn main() {
 
     let window = app.window();
     window.set_fullscreen(true);
-    window.hide_cursor();
+    _ = app
+        .as_weak()
+        .upgrade_in_event_loop(move |app| app.window().hide_cursor());
 
     let launcher = Launcher::new();
     load_and_apply_config(&app, &launcher);
