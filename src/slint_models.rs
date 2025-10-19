@@ -90,7 +90,7 @@ impl<TModel, TExt> ExtVecModel<TModel, TExt> {
             });
     }
 
-    pub fn get_ref(&self, idx: usize) -> Option<Ref<(TModel, TExt)>> {
+    pub fn get_ref(&self, idx: usize) -> Option<Ref<'_, (TModel, TExt)>> {
         Ref::filter_map(self.items.borrow(), |items| items.get(idx)).ok()
     }
 }

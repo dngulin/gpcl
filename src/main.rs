@@ -48,8 +48,8 @@ fn main() {
 }
 
 fn load_config_file() -> Config {
-    let xdg_dirs = xdg::BaseDirectories::new().unwrap();
-    let config_path = xdg_dirs.get_config_file(CONFIG_FILE_NAME);
+    let xdg_dirs = xdg::BaseDirectories::new();
+    let config_path = xdg_dirs.get_config_file(CONFIG_FILE_NAME).unwrap();
 
     let contents = match fs::read_to_string(config_path) {
         Ok(contents) => contents,
