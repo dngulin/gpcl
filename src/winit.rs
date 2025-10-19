@@ -1,4 +1,4 @@
-use slint::winit_030::WinitWindowAccessor;
+use i_slint_backend_winit::WinitWindowAccessor;
 use slint::Window;
 
 pub trait WinitWindow {
