@@ -2,7 +2,6 @@ mod clock;
 mod config;
 mod gamepad_manager;
 mod launcher;
-mod slint_models;
 mod winit;
 
 use config::{Config, LayoutConfig};
