@@ -3,12 +3,12 @@ use gilrs::{Gamepad, GamepadId, PowerInfo};
 use std::time::Instant;
 
 #[derive(Clone)]
-pub struct TrackingState {
+pub struct GamepadTrackingState {
     pub gamepad_id: GamepadId,
     update_time: Instant,
 }
 
-impl TrackingState {
+impl GamepadTrackingState {
     pub fn new(gamepad_id: GamepadId) -> Self {
         Self {
             gamepad_id,
@@ -25,8 +25,8 @@ impl TrackingState {
     }
 }
 
-pub fn gamepad_to_model_item(value: Gamepad) -> (GamepadModel, TrackingState) {
-    (value.into(), TrackingState::new(value.id()))
+pub fn create_model_and_tracking_state(value: Gamepad) -> (GamepadModel, GamepadTrackingState) {
+    (value.into(), GamepadTrackingState::new(value.id()))
 }
 
 fn convert_power_info(power_info: PowerInfo) -> (GamepadStatus, i32) {

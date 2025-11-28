@@ -5,22 +5,22 @@ mod model;
 
 use filter_axis_to_dpad_buttons::left_axis_to_dpad_btn;
 use filter_dpad_button_events::filter_wrong_dpad_events;
-use model::{gamepad_to_model_item, TrackingState, UpdatePowerInfo};
+use model::{create_model_and_tracking_state, GamepadTrackingState, UpdatePowerInfo};
 
 use gilrs::ev::filter::{axis_dpad_to_button, deadzone, Jitter, Repeat};
-use gilrs::{EventType, Filter, GamepadId, Gilrs, GilrsBuilder, PowerInfo};
+use gilrs::{EventType, Filter, GamepadId, Gilrs, GilrsBuilder};
 use slint::platform::WindowEvent;
-use slint::Window;
+use slint::{Model, VecModel, Window};
 use std::rc::Rc;
 use std::time::Duration;
 
-use crate::slint_models::ExtVecModel;
 use crate::winit::WinitWindow;
 use crate::GamepadModel;
 
 pub struct GamepadManager {
     gilrs: Gilrs,
-    gamepads: Rc<ExtVecModel<GamepadModel, TrackingState>>,
+    states: Vec<GamepadTrackingState>,
+    models: Rc<VecModel<GamepadModel>>,
 }
 
 impl GamepadManager {
@@ -31,18 +31,27 @@ impl GamepadManager {
             .build()
             .map_err(|error| format!("Failed to init gamepad input backend: {}", error))?;
 
-        let gamepads = gilrs
+        let mut states = Vec::default();
+        let models = VecModel::default();
+
+        for (model, state) in gilrs
             .gamepads()
             .filter(|(_, g)| g.is_connected())
-            .map(|(_, g)| gamepad_to_model_item(g))
-            .collect();
-        let gamepads = Rc::new(ExtVecModel::with_items(gamepads));
+            .map(|(_, g)| create_model_and_tracking_state(g))
+        {
+            states.push(state);
+            models.push(model);
+        }
 
-        Ok(Self { gilrs, gamepads })
+        Ok(Self {
+            gilrs,
+            states,
+            models: Rc::new(models),
+        })
     }
 
-    pub fn model(&self) -> Rc<ExtVecModel<GamepadModel, TrackingState>> {
-        self.gamepads.clone()
+    pub fn model(&self) -> Rc<VecModel<GamepadModel>> {
+        self.models.clone()
     }
 
     pub fn poll(&mut self, window: &Window) {
@@ -84,12 +93,19 @@ impl GamepadManager {
                     }
                 }
                 EventType::Connected => {
-                    let item = gamepad_to_model_item(gilrs.gamepad(gamepad_id));
-                    self.gamepads.add(item);
+                    let (model, state) = create_model_and_tracking_state(gilrs.gamepad(gamepad_id));
+                    self.states.push(state);
+                    self.models.push(model);
                 }
                 EventType::Disconnected => {
-                    self.gamepads
-                        .remove(|(_, tracking_state)| tracking_state.gamepad_id == gamepad_id);
+                    if let Some(idx) = self
+                        .states
+                        .iter()
+                        .position(|state| state.gamepad_id == gamepad_id)
+                    {
+                        self.states.remove(idx);
+                        self.models.remove(idx);
+                    }
                 }
                 _ => continue,
             }
@@ -99,23 +115,29 @@ impl GamepadManager {
     }
 
     fn update_power_info(&mut self) {
-        self.gamepads.update_items(|model, tracking_state| {
-            if tracking_state.get_seconds_since_last_update() < 0.5 {
-                return false;
+        for (idx, state) in self.states.iter_mut().enumerate() {
+            if state.get_seconds_since_last_update() < 0.5 {
+                continue;
             }
 
-            tracking_state.reset_update_time();
-
-            if let Some(info) = get_power_info(&self.gilrs, tracking_state.gamepad_id) {
-                return model.update_power_info(info);
-            }
-
-            log::error!("Failed to get power info for `{}`", model.name);
-            false
-        });
+            state.reset_update_time();
+            _ = update_gamepad_model(&self.gilrs, state.gamepad_id, &self.models, idx);
+        }
     }
 }
 
-fn get_power_info(gilrs: &Gilrs, gamepad_id: GamepadId) -> Option<PowerInfo> {
-    gilrs.connected_gamepad(gamepad_id).map(|g| g.power_info())
+fn update_gamepad_model(
+    gilrs: &Gilrs,
+    id: GamepadId,
+    models: &Rc<VecModel<GamepadModel>>,
+    idx: usize,
+) -> Option<()> {
+    let power_info = gilrs.connected_gamepad(id)?.power_info();
+
+    let mut model = models.row_data(idx)?;
+    if model.update_power_info(power_info) {
+        models.set_row_data(idx, model);
+    }
+
+    Some(())
 }
