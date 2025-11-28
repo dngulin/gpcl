@@ -33,8 +33,8 @@ pub fn config_entry_into_item(config: &AppIconConfig) -> (AppIconModel, Executab
         Image::default()
     });
     let name = (&config.name).into();
-
     let model = AppIconModel { image, name };
+
     let executable = Executable::new(&config.exec);
 
     (model, executable)

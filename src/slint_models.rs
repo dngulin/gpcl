@@ -1,6 +1,6 @@
 use slint::{Model, ModelNotify, ModelTracker};
 use std::any::Any;
-use std::cell::{Ref, RefCell};
+use std::cell::RefCell;
 
 pub struct ExtVecModel<TModel, TExt> {
     items: RefCell<Vec<(TModel, TExt)>>,
@@ -28,26 +28,10 @@ impl<TModel: Clone + 'static, TExt: 'static> Model for ExtVecModel<TModel, TExt>
 }
 
 impl<TModel, TExt> ExtVecModel<TModel, TExt> {
-    pub fn new() -> Self {
-        Self {
-            items: RefCell::new(Vec::new()),
-            notify: ModelNotify::default(),
-        }
-    }
-
     pub fn with_items(items: Vec<(TModel, TExt)>) -> Self {
         Self {
             items: RefCell::new(items),
             notify: ModelNotify::default(),
-        }
-    }
-
-    pub fn clear(&self) {
-        let len = self.items.borrow().len();
-        self.items.borrow_mut().clear();
-
-        if len > 0 {
-            self.notify.row_removed(0, len);
         }
     }
 
@@ -88,9 +72,5 @@ impl<TModel, TExt> ExtVecModel<TModel, TExt> {
                     self.notify.row_changed(idx);
                 }
             });
-    }
-
-    pub fn get_ref(&self, idx: usize) -> Option<Ref<'_, (TModel, TExt)>> {
-        Ref::filter_map(self.items.borrow(), |items| items.get(idx)).ok()
     }
 }

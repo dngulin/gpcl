@@ -36,8 +36,8 @@ fn main() {
         .as_weak()
         .upgrade_in_event_loop(move |app| app.window().hide_cursor());
 
-    let launcher = Launcher::new();
-    load_and_apply_config(&app, &launcher);
+    let mut launcher = Launcher::new();
+    load_and_apply_config(&app, &mut launcher);
 
     let launcher = Rc::new(RefCell::new(launcher));
     setup_config_reloading(&app, launcher.clone());
@@ -67,7 +67,7 @@ fn load_config_file() -> Config {
     })
 }
 
-fn load_and_apply_config(app: &GpclApp, launcher: &Launcher) {
+fn load_and_apply_config(app: &GpclApp, launcher: &mut Launcher) {
     let config = load_config_file();
 
     let layout = app.global::<ScreenLayout>();
@@ -128,7 +128,7 @@ fn setup_config_reloading(app: &GpclApp, launcher: Rc<RefCell<Launcher>>) {
     let app_weak = app.as_weak();
     app.on_reload_pressed(move || {
         if let Some(app) = app_weak.upgrade() {
-            load_and_apply_config(&app, &launcher.borrow());
+            load_and_apply_config(&app, &mut launcher.borrow_mut());
         }
     });
 }

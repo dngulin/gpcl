@@ -1,37 +1,40 @@
 mod model;
 
-use model::Executable;
-use std::ops::Deref;
-
-use crate::slint_models::ExtVecModel;
-use crate::{config::AppIconConfig, AppIconModel};
-
 use crate::launcher::model::config_entry_into_item;
+use crate::{config::AppIconConfig, AppIconModel};
+use model::Executable;
+
+use slint::VecModel;
 use std::process::{Child, Command};
 use std::rc::Rc;
 
 pub struct Launcher {
-    items: Rc<ExtVecModel<AppIconModel, Executable>>,
+    items: Vec<Executable>,
+    item_icons: Rc<VecModel<AppIconModel>>,
     child_process: Option<Child>,
 }
 
 impl Launcher {
     pub fn new() -> Self {
         Self {
-            items: Rc::new(ExtVecModel::new()),
+            items: Vec::new(),
+            item_icons: Rc::new(VecModel::default()),
             child_process: None,
         }
     }
 
-    pub fn reset_items(&self, items: &[AppIconConfig]) {
+    pub fn reset_items(&mut self, items: &[AppIconConfig]) {
         self.items.clear();
-        for item in items.iter().map(config_entry_into_item) {
-            self.items.add(item);
+        self.item_icons.clear();
+
+        for (icon, item) in items.iter().map(config_entry_into_item) {
+            self.items.push(item);
+            self.item_icons.push(icon);
         }
     }
 
-    pub fn model(&self) -> Rc<ExtVecModel<AppIconModel, Executable>> {
-        self.items.clone()
+    pub fn model(&self) -> Rc<VecModel<AppIconModel>> {
+        self.item_icons.clone()
     }
 
     pub fn exec_item(&mut self, idx: usize) {
@@ -40,13 +43,15 @@ impl Launcher {
             return;
         }
 
-        if let Some(item_ref) = self.items.get_ref(idx) {
-            let (model, exec) = item_ref.deref();
-
+        if let Some(exec) = self.items.get(idx) {
             let child = match Command::new(&exec.program).args(&exec.args).spawn() {
                 Ok(child) => Some(child),
                 Err(error) => {
-                    log::error!("Failed to execute the command `{}`: {}", model.name, error);
+                    log::error!(
+                        "Failed to execute the command `{}`: {}",
+                        exec.program,
+                        error
+                    );
                     None
                 }
             };
